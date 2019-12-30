@@ -19,13 +19,14 @@ const newLine string = "说明,字段名,字段类型,备注,"
 
 // GenStruct 数据
 type GenStruct struct {
-	FileName        string
-	ProjectName     string
-	EntityName      string
-	EntityNote      string
-	EntityTableName string
-	EntityContent   string
-	EntityToContent string
+	FileName            string
+	ProjectName         string
+	EntityName          string
+	EntityNote          string
+	EntityTableName     string
+	EntityContent       string
+	EntityToContent     string
+	EntitySchemaContent string
 }
 
 // GenElement 数据
@@ -51,6 +52,9 @@ func Execute() {
 	tCtl, err := template.ParseFiles("templates/ctl.txt") // 找到其中需要替换的模板变量
 	checkErr(err)
 
+	tSchema, err := template.ParseFiles("templates/schema.txt") // 找到其中需要替换的模板变量
+	checkErr(err)
+
 	f, err := excelize.OpenFile(config.GetInFilePath())
 	if err != nil {
 		fmt.Println(err)
@@ -68,7 +72,7 @@ func Execute() {
 		if ok, _ := regexp.MatchString(`^[^,]*([\(|（]+)[^,]*([a-zA-Z][a-zA-Z]+)_?([a-zA-Z]+)([\)|）]+)`, line); ok {
 
 			if len(genElements) > 0 {
-				doGen(tEntity, tModel, tBll, tCtl, genStruct, genElements)
+				doGen(tEntity, tModel, tBll, tCtl, tSchema, genStruct, genElements)
 			}
 
 			// fmt.Println(line)
@@ -104,23 +108,26 @@ func Execute() {
 	}
 
 	if len(genElements) > 0 {
-		doGen(tEntity, tModel, tBll, tCtl, genStruct, genElements)
+		doGen(tEntity, tModel, tBll, tCtl, tSchema, genStruct, genElements)
 	}
 }
 
 // 生成 文件
-func doGen(tEntity *template.Template, tModel *template.Template, tBll *template.Template, tCtl *template.Template, genStruct *GenStruct, genElements []GenElement) {
+func doGen(tEntity *template.Template, tModel *template.Template, tBll *template.Template, tCtl *template.Template, tSchema *template.Template, genStruct *GenStruct, genElements []GenElement) {
 	fmt.Println(genStruct.EntityTableName, genStruct.EntityNote, genStruct.EntityName)
 
 	content := ""
 	toContent := ""
+	schemaContent := ""
 	for _, v := range genElements {
-		pGorm, pType := genGorm(&v)
+		pGorm, pType, pjson := genGorm(&v)
 		content += fmt.Sprintf("%s %s `%s` // %s \n", v.Name, pType, pGorm, v.Notes)
-		toContent += fmt.Sprintf("%s: a.%s,", v.Name, v.Name)
+		toContent += fmt.Sprintf("%s: a.%s,\n", v.Name, v.Name)
+		schemaContent += fmt.Sprintf("%s %s `%s` // %s \n", v.Name, pType, pjson, v.Notes)
 	}
 	genStruct.EntityContent = content
 	genStruct.EntityToContent = toContent
+	genStruct.EntitySchemaContent = schemaContent
 
 	// 输出到buf
 	buf := new(bytes.Buffer)
@@ -142,6 +149,11 @@ func doGen(tEntity *template.Template, tModel *template.Template, tBll *template
 	tCtl.Execute(buf, genStruct) // 执行模板的替换
 	writeFile("ctl", "c_", genStruct.FileName, buf.String())
 
+	// 输出到buf
+	buf = new(bytes.Buffer)
+	tSchema.Execute(buf, genStruct) // 执行模板的替换
+	writeFile("schema", "s_", genStruct.FileName, buf.String())
+
 	// path, _ := writeFile("e_", genStruct.FileName, buf.String())
 
 	// fmt.Println("formatting differs from goimport's:")
@@ -153,8 +165,8 @@ func doGen(tEntity *template.Template, tModel *template.Template, tBll *template
 	// fmt.Println(string(cmd))
 }
 
-func genGorm(v *GenElement) (string, string) {
-	// fmt.Println(v.Name, v.NameLower, v.Type, v.Notes)
+func genGorm(v *GenElement) (string, string, string) {
+	fmt.Println(v.Name, v.NameLower, v.Type, v.Notes)
 	gorm := fmt.Sprintf("column:%s;", v.NameLower)
 
 	stype, len := getTypeName(strings.ToLower(v.Type))
@@ -166,9 +178,9 @@ func genGorm(v *GenElement) (string, string) {
 		}
 	}
 
-	fmt.Println(v.Name, stype)
+	// fmt.Println(v.Name, stype)
 
-	return fmt.Sprintf("gorm:\"%s\"", gorm), stype
+	return fmt.Sprintf("gorm:\"%s\"", gorm), stype, fmt.Sprintf("json:\"%s\" swaggo:\"false,%s\"", v.NameLower, v.Notes)
 }
 
 // 保存文件
