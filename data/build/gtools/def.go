@@ -75,7 +75,7 @@ func getNameLenght(value, k, name string) (string, int) {
 
 	reg := regexp.MustCompile(k)
 	values := reg.FindStringSubmatch(name)
-	fmt.Println(values)
+	// fmt.Println(values)
 	if len(values) > 2 {
 		len, _ := strconv.Atoi(values[2])
 		return value, len

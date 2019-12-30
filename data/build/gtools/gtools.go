@@ -48,6 +48,9 @@ func Execute() {
 	tBll, err := template.ParseFiles("templates/bll.txt") // 找到其中需要替换的模板变量
 	checkErr(err)
 
+	tCtl, err := template.ParseFiles("templates/ctl.txt") // 找到其中需要替换的模板变量
+	checkErr(err)
+
 	f, err := excelize.OpenFile(config.GetInFilePath())
 	if err != nil {
 		fmt.Println(err)
@@ -65,7 +68,7 @@ func Execute() {
 		if ok, _ := regexp.MatchString(`^[^,]*([\(|（]+)[^,]*([a-zA-Z][a-zA-Z]+)_?([a-zA-Z]+)([\)|）]+)`, line); ok {
 
 			if len(genElements) > 0 {
-				doGen(tEntity, tModel, tBll, genStruct, genElements)
+				doGen(tEntity, tModel, tBll, tCtl, genStruct, genElements)
 			}
 
 			// fmt.Println(line)
@@ -101,12 +104,12 @@ func Execute() {
 	}
 
 	if len(genElements) > 0 {
-		doGen(tEntity, tModel, tBll, genStruct, genElements)
+		doGen(tEntity, tModel, tBll, tCtl, genStruct, genElements)
 	}
 }
 
 // 生成 文件
-func doGen(tEntity *template.Template, tModel *template.Template, tBll *template.Template, genStruct *GenStruct, genElements []GenElement) {
+func doGen(tEntity *template.Template, tModel *template.Template, tBll *template.Template, tCtl *template.Template, genStruct *GenStruct, genElements []GenElement) {
 	fmt.Println(genStruct.EntityTableName, genStruct.EntityNote, genStruct.EntityName)
 
 	content := ""
@@ -133,6 +136,11 @@ func doGen(tEntity *template.Template, tModel *template.Template, tBll *template
 	buf = new(bytes.Buffer)
 	tBll.Execute(buf, genStruct) // 执行模板的替换
 	writeFile("bll", "b_", genStruct.FileName, buf.String())
+
+	// 输出到buf
+	buf = new(bytes.Buffer)
+	tCtl.Execute(buf, genStruct) // 执行模板的替换
+	writeFile("ctl", "c_", genStruct.FileName, buf.String())
 
 	// path, _ := writeFile("e_", genStruct.FileName, buf.String())
 

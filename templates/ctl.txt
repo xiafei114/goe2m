@@ -1,0 +1,209 @@
+package project
+
+import (
+	"{{ .ProjectName }}/internal/app/project/bll"
+	projectBll "{{ .ProjectName }}/internal/app/project/bll/project"
+	"{{ .ProjectName }}/internal/app/project/ginplus"
+	"{{ .ProjectName }}/internal/app/project/schema"
+	projectSchema "{{ .ProjectName }}/internal/app/project/schema/project"
+	"{{ .ProjectName }}/pkg/errors"
+	"{{ .ProjectName }}/pkg/util"
+
+	"github.com/gin-gonic/gin"
+)
+
+// New{{ .EntityName }} 创建{{ .EntityName }}控制器
+func New{{ .EntityName }}(b *bll.Common) *{{ .EntityName }} {
+	return &{{ .EntityName }}{
+		{{ .EntityName }}Bll: b.{{ .EntityName }},
+	}
+}
+
+// {{ .EntityName }} {{ .EntityName }}
+// @Name {{ .EntityName }}
+// @Description {{ .EntityName }}
+type {{ .EntityName }} struct {
+	{{ .EntityName }}Bll *projectBll.{{ .EntityName }}
+}
+
+// Query 查询数据
+func (a *{{ .EntityName }}) Query(c *gin.Context) {
+	switch c.Query("q") {
+	case "page":
+		a.QueryPage(c)
+	case "list":
+		a.QueryList(c)
+	default:
+		ginplus.ResError(c, errors.NewBadRequestError("未知的查询类型"))
+	}
+}
+
+// QueryPage 查询分页数据
+// @Summary 查询分页数据
+// @Param Authorization header string false "Bearer 用户令牌"
+// @Param current query int true "分页索引" 1
+// @Param pageSize query int true "分页大小" 10
+// @Param code query string false "编号"
+// @Param name query string false "名称"
+// @Param status query int false "状态(1:启用 2:停用)"
+// @Success 200 []projectSchema.{{ .EntityName }} "查询结果：{list:列表数据,pagination:{current:页索引,pageSize:页大小,total:总数量}}"
+// @Failure 400 schema.HTTPError "{error:{code:0,message:未知的查询类型}}"
+// @Failure 401 schema.HTTPError "{error:{code:0,message:未授权}}"
+// @Failure 500 schema.HTTPError "{error:{code:0,message:服务器错误}}"
+// @Router GET /api/v1/{{ .EntityName }}?q=page
+func (a *{{ .EntityName }}) QueryPage(c *gin.Context) {
+	var params schema.CommonQueryParam
+	params.IndexCode = c.Query("index_Code")
+	params.ChnName = c.Query("chn_Name")
+	params.Status = util.S(c.Query("status")).Int()
+
+	items, pr, err := a.{{ .EntityName }}Bll.QueryPage(ginplus.NewContext(c), params, ginplus.GetPaginationParam(c))
+	if err != nil {
+		ginplus.ResError(c, err)
+		return
+	}
+
+	ginplus.ResPage(c, items, pr)
+}
+
+// QueryList 查询数据
+// @Summary 查询数据
+// @Param Authorization header string false "Bearer 用户令牌"
+// @Success 200 []projectSchema.AlarmCaseProcess "分页查询结果：{data:列表数据}"
+// @Failure 400 schema.HTTPError "{error:{code:0,message:未知的查询类型}}"
+// @Failure 401 schema.HTTPError "{error:{code:0,message:未授权}}"
+// @Failure 500 schema.HTTPError "{error:{code:0,message:服务器错误}}"
+// @Router GET /api/v1/{{ .EntityName }}?q=list
+func (a *{{ .EntityName }}) QueryList(c *gin.Context) {
+	var params schema.CommonQueryParam
+	params.IndexCode = c.Query("index_Code")
+
+	items, err := a.{{ .EntityName }}Bll.QueryList(ginplus.NewContext(c), params)
+	if err != nil {
+		ginplus.ResError(c, err)
+		return
+	}
+	ginplus.ResData(c, items)
+}
+
+// Get 查询指定数据
+// @Summary 查询指定数据
+// @Param Authorization header string false "Bearer 用户令牌"
+// @Param id path string true "记录ID"
+// @Success 200 projectSchema.{{ .EntityName }}
+// @Failure 401 schema.HTTPError "{error:{code:0,message:未授权}}"
+// @Failure 404 schema.HTTPError "{error:{code:0,message:资源不存在}}"
+// @Failure 500 schema.HTTPError "{error:{code:0,message:服务器错误}}"
+// @Router GET /api/v1/{{ .EntityName }}/{id}
+func (a *{{ .EntityName }}) Get(c *gin.Context) {
+	item, err := a.{{ .EntityName }}Bll.Get(ginplus.NewContext(c), c.Param("id"))
+	if err != nil {
+		ginplus.ResError(c, err)
+		return
+	}
+	ginplus.ResSuccess(c, item)
+}
+
+// Create 创建数据
+// @Summary 创建数据
+// @Param Authorization header string false "Bearer 用户令牌"
+// @Param body body projectSchema.{{ .EntityName }} true
+// @Success 200 projectSchema.{{ .EntityName }}
+// @Failure 400 schema.HTTPError "{error:{code:0,message:无效的请求参数}}"
+// @Failure 401 schema.HTTPError "{error:{code:0,message:未授权}}"
+// @Failure 500 schema.HTTPError "{error:{code:0,message:服务器错误}}"
+// @Router POST /api/v1/{{ .EntityName }}
+func (a *{{ .EntityName }}) Create(c *gin.Context) {
+	var item projectSchema.{{ .EntityName }}
+	if err := ginplus.ParseJSON(c, &item); err != nil {
+		ginplus.ResError(c, err)
+		return
+	}
+
+	nitem, err := a.{{ .EntityName }}Bll.Create(ginplus.NewContext(c), item)
+	if err != nil {
+		ginplus.ResError(c, err)
+		return
+	}
+	ginplus.ResSuccess(c, nitem)
+}
+
+// Update 更新数据
+// @Summary 更新数据
+// @Param Authorization header string false "Bearer 用户令牌"
+// @Param id path string true "记录ID"
+// @Param body body projectSchema.{{ .EntityName }} true
+// @Success 200 projectSchema.{{ .EntityName }}
+// @Failure 400 schema.HTTPError "{error:{code:0,message:无效的请求参数}}"
+// @Failure 401 schema.HTTPError "{error:{code:0,message:未授权}}"
+// @Failure 500 schema.HTTPError "{error:{code:0,message:服务器错误}}"
+// @Router PUT /api/v1/{{ .EntityName }}/{id}
+func (a *{{ .EntityName }}) Update(c *gin.Context) {
+	var item projectSchema.{{ .EntityName }}
+	if err := ginplus.ParseJSON(c, &item); err != nil {
+		ginplus.ResError(c, err)
+		return
+	}
+
+	nitem, err := a.{{ .EntityName }}Bll.Update(ginplus.NewContext(c), c.Param("id"), item)
+	if err != nil {
+		ginplus.ResError(c, err)
+		return
+	}
+	ginplus.ResSuccess(c, nitem)
+}
+
+// Delete 删除数据
+// @Summary 删除数据
+// @Param Authorization header string false "Bearer 用户令牌"
+// @Param id path string true "记录ID"
+// @Success 200 schema.HTTPStatus "{status:OK}"
+// @Failure 401 schema.HTTPError "{error:{code:0,message:未授权}}"
+// @Failure 500 schema.HTTPError "{error:{code:0,message:服务器错误}}"
+// @Router DELETE /api/v1/{{ .EntityName }}/{id}
+func (a *{{ .EntityName }}) Delete(c *gin.Context) {
+	err := a.{{ .EntityName }}Bll.Delete(ginplus.NewContext(c), c.Param("id"))
+	if err != nil {
+		ginplus.ResError(c, err)
+		return
+	}
+	ginplus.ResOK(c)
+}
+
+// Enable 启用数据
+// @Summary 启用数据
+// @Param Authorization header string false "Bearer 用户令牌"
+// @Param id path string true "记录ID"
+// @Success 200 schema.HTTPStatus "{status:OK}"
+// @Failure 401 schema.HTTPError "{error:{code:0,message:未授权}}"
+// @Failure 500 schema.HTTPError "{error:{code:0,message:服务器错误}}"
+// @Router PATCH /api/v1/{{ .EntityName }}/{id}/enable
+func (a *{{ .EntityName }}) Enable(c *gin.Context) {
+	err := a.{{ .EntityName }}Bll.UpdateStatus(ginplus.NewContext(c), c.Param("id"), 1)
+	if err != nil {
+		ginplus.ResError(c, err)
+		return
+	}
+	ginplus.ResOK(c)
+}
+
+// Disable 禁用数据
+// @Summary 禁用数据
+// @Param Authorization header string false "Bearer 用户令牌"
+// @Param id path string true "记录ID"
+// @Success 200 schema.HTTPStatus "{status:OK}"
+// @Failure 401 schema.HTTPError "{error:{code:0,message:未授权}}"
+// @Failure 500 schema.HTTPError "{error:{code:0,message:服务器错误}}"
+// @Router PATCH /api/v1/{{ .EntityName }}/{id}/disable
+func (a *{{ .EntityName }}) Disable(c *gin.Context) {
+	err := a.{{ .EntityName }}Bll.UpdateStatus(ginplus.NewContext(c), c.Param("id"), 2)
+	if err != nil {
+		ginplus.ResError(c, err)
+		return
+	}
+	ginplus.ResOK(c)
+}
+
+func t12() {
+	schema.Init()
+}
