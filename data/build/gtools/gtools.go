@@ -39,7 +39,10 @@ type GenElement struct {
 
 // Execute 执行
 func Execute() {
-	t, err := template.ParseFiles("templates/entity_model.txt") // 找到其中需要替换的模板变量
+	tEntity, err := template.ParseFiles("templates/entity.txt") // 找到其中需要替换的模板变量
+	checkErr(err)
+
+	tModel, err := template.ParseFiles("templates/model.txt") // 找到其中需要替换的模板变量
 	checkErr(err)
 
 	f, err := excelize.OpenFile(config.GetInFilePath())
@@ -59,7 +62,7 @@ func Execute() {
 		if ok, _ := regexp.MatchString(`^[^,]*([\(|（]+)[^,]*([a-zA-Z][a-zA-Z]+)_?([a-zA-Z]+)([\)|）]+)`, line); ok {
 
 			if len(genElements) > 0 {
-				doGenStruct(t, genStruct, genElements)
+				doGen(tEntity, tModel, genStruct, genElements)
 			}
 
 			// fmt.Println(line)
@@ -95,12 +98,12 @@ func Execute() {
 	}
 
 	if len(genElements) > 0 {
-		doGenStruct(t, genStruct, genElements)
+		doGen(tEntity, tModel, genStruct, genElements)
 	}
 }
 
-// 生成 entity 文件
-func doGenStruct(t *template.Template, genStruct *GenStruct, genElements []GenElement) {
+// 生成 文件
+func doGen(tEntity *template.Template, tModel *template.Template, genStruct *GenStruct, genElements []GenElement) {
 	fmt.Println(genStruct.EntityTableName, genStruct.EntityNote, genStruct.EntityName)
 
 	content := ""
@@ -115,8 +118,14 @@ func doGenStruct(t *template.Template, genStruct *GenStruct, genElements []GenEl
 
 	// 输出到buf
 	buf := new(bytes.Buffer)
-	t.Execute(buf, genStruct) // 执行模板的替换
-	writeFile("e_", genStruct.FileName, buf.String())
+	tEntity.Execute(buf, genStruct) // 执行模板的替换
+	writeFile("entity", "e_", genStruct.FileName, buf.String())
+
+	// 输出到buf
+	buf = new(bytes.Buffer)
+	tModel.Execute(buf, genStruct) // 执行模板的替换
+	writeFile("model", "m_", genStruct.FileName, buf.String())
+
 	// path, _ := writeFile("e_", genStruct.FileName, buf.String())
 
 	// fmt.Println("formatting differs from goimport's:")
@@ -147,8 +156,8 @@ func genGorm(v *GenElement) (string, string) {
 }
 
 // 保存文件
-func writeFile(prefix, fname, content string) (string, bool) {
-	path := fmt.Sprintf("%s/entity/%s%s.go", config.GetOutDir(), prefix, fname)
+func writeFile(stype, prefix, fname, content string) (string, bool) {
+	path := fmt.Sprintf("%s/%s/%s%s.go", config.GetOutDir(), stype, prefix, fname)
 	return path, tools.WriteFile(path, []string{content}, true)
 }
 
