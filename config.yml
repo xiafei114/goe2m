@@ -1,2 +1,2 @@
-in_file_path : 1111111111111111111  # 输入文件
+in_file_path : ./example.xlsx  # 输入文件
 out_dir : ./target  # 输出目录
