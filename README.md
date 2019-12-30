@@ -4,10 +4,7 @@
 --------
 
 #### excel 转 struct 工具,可以将excel 自动生成golang sturct结构，带大驼峰命名规则。带json标签
-#### 此项目为例生成 [gin-admin]https://github.com/xiafei114/gin-admin 的entity model bll ctl schema 开发
-
-
-[English](README.md)
+#### 此项目为例生成 [gin-admin](https://github.com/xiafei114/gin-admin) 的entity model bll ctl schema 开发
 
 --------
 
