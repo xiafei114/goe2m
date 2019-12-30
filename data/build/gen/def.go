@@ -1,4 +1,4 @@
-package gtools
+package gen
 
 import (
 	"fmt"

@@ -1,7 +1,7 @@
 package cmd
 
 import (
-	"goe2m/data/build/gtools"
+	"goe2m/data/build/gen"
 	"os"
 
 	"github.com/spf13/cobra"
@@ -15,7 +15,7 @@ var rootCmd = &cobra.Command{
 	Short: "gorm mysql reflect tools",
 	Long:  `base on gorm tools for mysql database to golang struct`,
 	Run: func(cmd *cobra.Command, args []string) {
-		gtools.Execute()
+		gen.Execute()
 		// Start doing things.开始做事情
 	},
 }
