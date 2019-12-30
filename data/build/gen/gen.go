@@ -60,56 +60,61 @@ func Execute() {
 		fmt.Println(err)
 	}
 
-	rows := f.GetRows("Sheet1")
+	sheet := f.GetSheetMap()
 
-	var genStruct *GenStruct
-	var genElements []GenElement
-	for _, row := range rows {
-		line := fmt.Sprintf("%s,%s,%s,%s,", row[0], row[1], row[2], row[3])
+	for _, v := range sheet {
+		rows := f.GetRows(v)
 
-		isTable := line == newLine
+		var genStruct *GenStruct
+		var genElements []GenElement
+		for _, row := range rows {
+			line := fmt.Sprintf("%s,%s,%s,%s,", row[0], row[1], row[2], row[3])
 
-		if ok, _ := regexp.MatchString(`^[^,]*([\(|（]+)[^,]*([a-zA-Z][a-zA-Z]+)_?([a-zA-Z]+)([\)|）]+)`, line); ok {
+			isTable := line == newLine
 
-			if len(genElements) > 0 {
-				doGen(tEntity, tModel, tBll, tCtl, tSchema, genStruct, genElements)
+			if ok, _ := regexp.MatchString(`^[^,]*([\(|（]+)[^,]*([a-zA-Z][a-zA-Z]+)_?([a-zA-Z]+)([\)|）]+)`, line); ok {
+
+				if len(genElements) > 0 {
+					doGen(tEntity, tModel, tBll, tCtl, tSchema, genStruct, genElements)
+				}
+
+				// fmt.Println(line)
+				genElements = make([]GenElement, 0)
+
+				tableName := row[1]
+				tableNote := row[0]
+				modelName := row[2]
+
+				tableName = strings.ToUpper(model.GetCamelName(tableName))
+				fileName := strings.ToLower(model.GetCamelName(modelName))
+
+				genStruct = &GenStruct{FileName: fileName, ProjectName: config.GetProjectName(), EntityName: modelName, EntityTableName: tableName, EntityNote: tableNote}
+
+			} else if !isTable {
+				if line == ",,,," {
+					continue
+				}
+				eName := row[1]
+				etype := row[2]
+				eNote := row[0]
+
+				nameLower := ""
+
+				if eName != "" {
+					nameLower = strings.ToLower(model.GetCamelName(eName))
+				}
+
+				element := GenElement{Name: eName, Type: etype, Notes: eNote, NameLower: nameLower}
+				genElements = append(genElements, element)
 			}
 
-			// fmt.Println(line)
-			genElements = make([]GenElement, 0)
-
-			tableName := row[1]
-			tableNote := row[0]
-			modelName := row[2]
-
-			tableName = strings.ToUpper(model.GetCamelName(tableName))
-			fileName := strings.ToLower(model.GetCamelName(modelName))
-
-			genStruct = &GenStruct{FileName: fileName, ProjectName: config.GetProjectName(), EntityName: modelName, EntityTableName: tableName, EntityNote: tableNote}
-
-		} else if !isTable {
-			if line == ",,,," {
-				continue
-			}
-			eName := row[1]
-			etype := row[2]
-			eNote := row[0]
-
-			nameLower := ""
-
-			if eName != "" {
-				nameLower = strings.ToLower(model.GetCamelName(eName))
-			}
-
-			element := GenElement{Name: eName, Type: etype, Notes: eNote, NameLower: nameLower}
-			genElements = append(genElements, element)
 		}
 
+		if len(genElements) > 0 {
+			doGen(tEntity, tModel, tBll, tCtl, tSchema, genStruct, genElements)
+		}
 	}
 
-	if len(genElements) > 0 {
-		doGen(tEntity, tModel, tBll, tCtl, tSchema, genStruct, genElements)
-	}
 }
 
 // 生成 文件

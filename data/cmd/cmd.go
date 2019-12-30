@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"goe2m/data/build/gen"
+	"goe2m/data/config"
 	"os"
 
 	"github.com/spf13/cobra"
@@ -9,6 +10,7 @@ import (
 
 var inFilePath string
 var outDir string
+var projectName string
 
 var rootCmd = &cobra.Command{
 	Use:   "main",
@@ -37,9 +39,22 @@ func init() {
 	rootCmd.PersistentFlags().StringVarP(&outDir, "outdir", "o", "", "输出目录")
 	rootCmd.MarkFlagRequired("outdir")
 
+	rootCmd.PersistentFlags().StringVarP(&projectName, "projectName", "p", "", "项目名称")
+	rootCmd.MarkFlagRequired("projectName")
+
 }
 
 // initConfig reads in config file and ENV variables if set.
 func initConfig() {
+	if len(outDir) > 0 {
+		config.SetOutDir(outDir)
+	}
 
+	if len(inFilePath) > 0 {
+		config.SetInFilePath(inFilePath)
+	}
+
+	if len(projectName) > 0 {
+		config.SetProjectName(projectName)
+	}
 }
