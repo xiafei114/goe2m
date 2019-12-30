@@ -6,6 +6,7 @@ import (
 	"goe2m/data/build/model"
 	"goe2m/data/config"
 	"log"
+	"regexp"
 	"strings"
 	"text/template"
 
@@ -16,14 +17,24 @@ import (
 
 const newLine string = "说明,字段名,字段类型,备注,"
 
-// Data 数据
-type Data struct {
+// GenStruct 数据
+type GenStruct struct {
+	FileName        string
 	ProjectName     string
 	EntityName      string
 	EntityNote      string
 	EntityTableName string
 	EntityContent   string
 	EntityToContent string
+}
+
+// GenElement 数据
+type GenElement struct {
+	Name      string              // Name.元素名
+	NameLower string              // 小写
+	Type      string              // Type.类型标记
+	Notes     string              // Notes.注释
+	Tags      map[string][]string // tages.标记
 }
 
 // Execute 执行
@@ -37,35 +48,119 @@ func Execute() {
 	}
 
 	rows := f.GetRows("Sheet1")
-	for index, row := range rows {
+
+	var genStruct *GenStruct
+	var genElements []GenElement
+	// genElements := make([]GenElement, 0)
+	for _, row := range rows {
 		var line string
-		for _, colCell := range row {
-			// fmt.Print(colCell, "\t")
-			line = line + colCell + ","
+		// for _, colCell := range row {
+		// fmt.Print(colCell, "\t")
+		line = fmt.Sprintf("%s,%s,%s,%s,", row[0], row[1], row[2], row[3])
 
-			// 是新行
-			isNewModel := line == newLine
+		isTable := line == newLine
 
-			if isNewModel {
-				tableName := rows[index-1][1]
-				tableNote := rows[index-1][0]
-				modelName := rows[index-1][2]
+		if ok, _ := regexp.MatchString(`^[^,]*([\(|（]+)[^,]*([a-zA-Z][a-zA-Z]+)_?([a-zA-Z]+)([\)|）]+)`, line); ok {
 
-				tableName = strings.ToUpper(model.GetCamelName(tableName))
-
-				fileName := strings.ToLower(model.GetCamelName(modelName))
-
-				fmt.Println(tableName, tableNote, modelName)
-				data := Data{ProjectName: "wms_platform", EntityName: modelName, EntityTableName: tableName, EntityNote: tableNote, EntityContent: "夕阳西下", EntityToContent: "夕阳西下"}
-
-				// 输出到buf
-				buf := new(bytes.Buffer)
-				t.Execute(buf, data) // 执行模板的替换
-				writeFile("e_", fileName, buf.String())
+			if len(genElements) > 0 {
+				doGenStruct(t, genStruct, genElements)
 			}
+
+			// fmt.Println(line)
+			genElements = make([]GenElement, 0)
+
+			tableName := row[1]
+			tableNote := row[0]
+			modelName := row[2]
+
+			tableName = strings.ToUpper(model.GetCamelName(tableName))
+			fileName := strings.ToLower(model.GetCamelName(modelName))
+
+			genStruct = &GenStruct{FileName: fileName, ProjectName: "wms_platform", EntityName: modelName, EntityTableName: tableName, EntityNote: tableNote, EntityContent: "夕阳西下", EntityToContent: "夕阳西下"}
+
+		} else if !isTable {
+			if line == ",,,," {
+				continue
+			}
+			eName := row[1]
+			etype := row[2]
+			eNote := row[0]
+
+			nameLower := ""
+
+			if eName != "" {
+				nameLower = strings.ToLower(model.GetCamelName(eName))
+			}
+
+			element := GenElement{Name: eName, Type: etype, Notes: eNote, NameLower: nameLower}
+			genElements = append(genElements, element)
 		}
 
+		// // 是新行
+		// isNewModel := line == newLine
+
+		// if isNewModel {
+		// 	tableName := rows[index-1][1]
+		// 	tableNote := rows[index-1][0]
+		// 	modelName := rows[index-1][2]
+
+		// 	tableName = strings.ToUpper(model.GetCamelName(tableName))
+
+		// 	fileName := strings.ToLower(model.GetCamelName(modelName))
+
+		// 	fmt.Println(tableName, tableNote, modelName)
+
+		// 	for _, v := range genElements {
+		// 		fmt.Println(v.Name, v.NameLower, v.Type, v.Notes)
+		// 	}
+
+		// 	data := GenStruct{ProjectName: "wms_platform", EntityName: modelName, EntityTableName: tableName, EntityNote: tableNote, EntityContent: "夕阳西下", EntityToContent: "夕阳西下"}
+
+		// 	// 输出到buf
+		// 	buf := new(bytes.Buffer)
+		// 	t.Execute(buf, data) // 执行模板的替换
+		// 	writeFile("e_", fileName, buf.String())
+		// 	genElements = make([]GenElement, 0)
+		// } else {
+		// 	if line == ",,,," {
+		// 		continue
+		// 	}
+
+		// 	eName := row[1]
+		// 	etype := row[2]
+		// 	eNote := row[0]
+
+		// 	nameLower := ""
+
+		// 	if eName != "" {
+		// 		nameLower = strings.ToLower(model.GetCamelName(eName))
+		// 	}
+
+		// 	element := GenElement{Name: eName, Type: etype, Notes: eNote, NameLower: nameLower}
+		// 	genElements = append(genElements, element)
+		// }
+		// }
+
 	}
+
+	if len(genElements) > 0 {
+		doGenStruct(t, genStruct, genElements)
+	}
+
+	// for _, v := range genElements {
+	// 	fmt.Println(v.Name, v.NameLower, v.Type, v.Notes)
+	// }
+}
+
+func doGenStruct(t *template.Template, genStruct *GenStruct, genElements []GenElement) {
+	fmt.Println(genStruct.EntityTableName, genStruct.EntityNote, genStruct.EntityName)
+	for _, v := range genElements {
+		fmt.Println(v.Name, v.NameLower, v.Type, v.Notes)
+	}
+	// 输出到buf
+	buf := new(bytes.Buffer)
+	t.Execute(buf, genStruct) // 执行模板的替换
+	writeFile("e_", genStruct.FileName, buf.String())
 }
 
 // 保存文件
