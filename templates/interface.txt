@@ -1,4 +1,4 @@
-// I{{ .EntityName }} {{ .EntityName }}存储接口
+// I{{ .EntityName }} {{ .EntityName }}存储接口.
 type I{{ .EntityName }} interface {
 	// 查询数据
 	Query(ctx context.Context, params schema.CommonQueryParam, opts ...schema.CommonQueryOptions) (*schema.CommonQueryResult, error)

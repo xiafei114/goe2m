@@ -1,3 +1,4 @@
+// {{ .EntityName }} {{ .EntityNote }}.
 type {{ .EntityName }} struct {
 	{{ .EntitySchemaContent }}
 }
