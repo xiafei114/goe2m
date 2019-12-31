@@ -1,0 +1,1 @@
+go build -o goe2m.exe main.go

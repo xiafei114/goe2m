@@ -16,6 +16,7 @@ var EImportsHead = map[string]string{
 // TypeMysqlDicMp Accurate matching type.精确匹配类型
 var TypeMysqlDicMp = map[string]string{
 	"int":                 "int",
+	"integer":             "int",
 	"bigint":              "int64",
 	"varchar":             "string",
 	"char":                "string",
@@ -33,6 +34,7 @@ var TypeMysqlDicMp = map[string]string{
 	"float":               "float32",
 	"tinytext":            "string",
 	"longblob":            "string",
+	"blob":                "string",
 }
 
 // TypeMysqlMatchMp Fuzzy Matching Types.模糊匹配类型
