@@ -1,0 +1,15 @@
+// I{{ .EntityName }} {{ .EntityName }}存储接口
+type I{{ .EntityName }} interface {
+	// 查询数据
+	Query(ctx context.Context, params schema.CommonQueryParam, opts ...schema.CommonQueryOptions) (*schema.CommonQueryResult, error)
+	// 查询指定数据
+	Get(ctx context.Context, recordID string, opts ...schema.CommonQueryOptions) (*schemaProject.{{ .EntityName }}, error)
+	// 创建数据
+	Create(ctx context.Context, item schemaProject.{{ .EntityName }}) error
+	// 更新数据
+	Update(ctx context.Context, recordID string, item schemaProject.{{ .EntityName }}) error
+	// 删除数据
+	Delete(ctx context.Context, recordID string) error
+	// 更新状态
+	UpdateStatus(ctx context.Context, recordID string, status int) error
+}

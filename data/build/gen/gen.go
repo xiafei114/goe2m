@@ -55,12 +55,18 @@ func Execute() {
 	tSchema, err := template.ParseFiles("templates/schema.txt") // 找到其中需要替换的模板变量
 	checkErr(err)
 
+	tInterface, err := template.ParseFiles("templates/interface.txt") // 找到其中需要替换的模板变量
+	checkErr(err)
+
 	f, err := excelize.OpenFile(config.GetInFilePath())
 	if err != nil {
 		fmt.Println(err)
 	}
 
 	sheet := f.GetSheetMap()
+
+	schemaContent := ""
+	interfaceContent := ""
 
 	for _, v := range sheet {
 		rows := f.GetRows(v)
@@ -75,7 +81,9 @@ func Execute() {
 			if ok, _ := regexp.MatchString(`^[^,]*([\(|（]+)[^,]*([a-zA-Z][a-zA-Z]+)_?([a-zA-Z]+)([\)|）]+)`, line); ok {
 
 				if len(genElements) > 0 {
-					doGen(tEntity, tModel, tBll, tCtl, tSchema, genStruct, genElements)
+					pSchemaContent, pInterfaceContent := doGen(tEntity, tModel, tBll, tCtl, tSchema, tInterface, genStruct, genElements)
+					schemaContent += pSchemaContent + "\n"
+					interfaceContent += pInterfaceContent + "\n"
 				}
 
 				// fmt.Println(line)
@@ -111,14 +119,18 @@ func Execute() {
 		}
 
 		if len(genElements) > 0 {
-			doGen(tEntity, tModel, tBll, tCtl, tSchema, genStruct, genElements)
+			pSchemaContent, pInterfaceContent := doGen(tEntity, tModel, tBll, tCtl, tSchema, tInterface, genStruct, genElements)
+			schemaContent += pSchemaContent + "\n"
+			interfaceContent += pInterfaceContent + "\n"
 		}
 	}
 
+	writeFile("schema", "s_project", "", schemaContent)
+	writeFile("interface", "m_project", "", interfaceContent)
 }
 
 // 生成 文件
-func doGen(tEntity *template.Template, tModel *template.Template, tBll *template.Template, tCtl *template.Template, tSchema *template.Template, genStruct *GenStruct, genElements []GenElement) {
+func doGen(tEntity *template.Template, tModel *template.Template, tBll *template.Template, tCtl *template.Template, tSchema *template.Template, tInterface *template.Template, genStruct *GenStruct, genElements []GenElement) (pSchemaContent string, pInterfaceContent string) {
 	fmt.Println(genStruct.EntityTableName, genStruct.EntityNote, genStruct.EntityName)
 
 	content := ""
@@ -157,17 +169,16 @@ func doGen(tEntity *template.Template, tModel *template.Template, tBll *template
 	// 输出到buf
 	buf = new(bytes.Buffer)
 	tSchema.Execute(buf, genStruct) // 执行模板的替换
-	writeFile("schema", "s_", genStruct.FileName, buf.String())
 
-	// path, _ := writeFile("e_", genStruct.FileName, buf.String())
+	pSchemaContent = buf.String()
 
-	// fmt.Println("formatting differs from goimport's:")
-	// cmd, _ := exec.Command("goimports", "-l", "-w", path).Output()
-	// fmt.Println(string(cmd))
+	// 输出到buf
+	buf = new(bytes.Buffer)
+	tInterface.Execute(buf, genStruct) // 执行模板的替换
 
-	// fmt.Println("formatting differs from gofmt's:")
-	// cmd, _ := exec.Command("gofmt", "-l", "-w", path).Output()
-	// fmt.Println(string(cmd))
+	pInterfaceContent = buf.String()
+
+	return
 }
 
 func genGorm(v *GenElement) (string, string, string) {
