@@ -57,22 +57,22 @@ var TypeMysqlMatchMp = map[string]string{
 func getTypeName(name string) (string, int) {
 	// Precise matching first.先精确匹配
 	if v, ok := TypeMysqlDicMp[name]; ok {
-		return getNameLenght(v, "", name)
+		return v, getNameLenght(v, "", name)
 	}
 
 	// Fuzzy Regular Matching.模糊正则匹配
 	for k, v := range TypeMysqlMatchMp {
 		if ok, _ := regexp.MatchString(k, name); ok {
-			return getNameLenght(v, k, name)
+			return v, getNameLenght(v, k, name)
 		}
 	}
 
 	panic(fmt.Sprintf("type (%v) not match in any way.maybe need to add", name))
 }
 
-func getNameLenght(value, k, name string) (string, int) {
+func getNameLenght(value, k, name string) int {
 	if value != "string" || k == "" {
-		return value, 0
+		return 0
 	}
 
 	reg := regexp.MustCompile(k)
@@ -80,8 +80,8 @@ func getNameLenght(value, k, name string) (string, int) {
 	// fmt.Println(values)
 	if len(values) > 2 {
 		len, _ := strconv.Atoi(values[2])
-		return value, len
+		return len
 	} else {
-		return value, 0
+		return 0
 	}
 }

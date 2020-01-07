@@ -46,7 +46,6 @@ func (a {{ .EntityName }}s) ToSchema{{ .EntityName }}s() []*schema.{{ .EntityNam
 // To{{ .EntityName }} 转换为{{ .EntityName }}实体
 func (a Schema{{ .EntityName }}) To{{ .EntityName }}() *{{ .EntityName }} {
 	item := &{{ .EntityName }}{
-		RecordID:     a.RecordID,
 		{{ .EntityToContent }}
 	}
 	return item
@@ -55,7 +54,6 @@ func (a Schema{{ .EntityName }}) To{{ .EntityName }}() *{{ .EntityName }} {
 // ToSchema{{ .EntityName }} 转换为{{ .EntityName }}对象
 func (a {{ .EntityName }}) ToSchema{{ .EntityName }}() *schema.{{ .EntityName }} {
 	item := &schema.{{ .EntityName }}{
-		RecordID:     a.RecordID,
 		{{ .EntityToContent }}
 	}
 	return item

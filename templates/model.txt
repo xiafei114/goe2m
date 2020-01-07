@@ -41,12 +41,10 @@ func (a *{{ .EntityName }}) Query(ctx context.Context, params schema.CommonQuery
 
 	db := entity.Get{{ .EntityName }}DB(ctx, a.db).DB
 	if v := params.IndexCode; v != "" { //查询关联进程
-		db = db.Where("company_Id=?", v)
-	} else {
-		db = db.Where("company_Id=?", "-1")
+		db = db.Where("index_code=?", v)
 	}
 	if v := params.ChnName; v != "" {
-		db = db.Where("chn_Name LIKE ?", "%"+v+"%")
+		db = db.Where("chn_name LIKE ?", "%"+v+"%")
 	}
 	if v := params.Status; v > 0 {
 		db = db.Where("status=?", v)
