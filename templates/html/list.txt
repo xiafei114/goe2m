@@ -23,7 +23,7 @@
       </a-form>
     </div>
 
-    <div v-if="$auth('materialMain.add')" class="table-operator">
+    <div v-if="$auth('{{ .EntityNameLower }}.add')" class="table-operator">
       <a-button type="primary" icon="plus" @click="$refs.createModal.add()">新建</a-button>
     </div>
 
@@ -33,13 +33,13 @@
       rowKey="record_id"
       :columns="columns"
       :data="loadData"
-      v-if="$auth('materialMain.list')"
+      v-if="$auth('{{ .EntityNameLower }}.list')"
     >
       <span slot="action" slot-scope="text, record">
         <template>
-          <a v-if="$auth('materialMain.edit')" @click="handleEdit(record)">编辑</a>
+          <a v-if="$auth('{{ .EntityNameLower }}.edit')" @click="handleEdit(record)">编辑</a>
           <a-divider type="vertical" />
-          <a v-if="$auth('materialMain.delete')" @click="handleDelete(record)">删除</a>
+          <a v-if="$auth('{{ .EntityNameLower }}.delete')" @click="handleDelete(record)">删除</a>
         </template>
       </span>
     </s-table>
@@ -50,8 +50,8 @@
 <script>
 import moment from 'moment/moment'
 import { STable } from '@/components'
-import entityForm from './MaterialMainForm'
-import { getMaterialMainPageList, deleteMaterialMain } from '@/api/project/system/materialMain'
+import entityForm from './{{ .EntityName }}Form'
+import { get{{ .EntityName }}PageList, delete{{ .EntityName }} } from '@/api/project/{{ .EntityNameLower }}'
 
 export default {
   components: {
@@ -88,7 +88,7 @@ export default {
       // 加载数据方法 必须为 Promise 对象
       loadData: parameter => {
         console.log('loadData.parameter', parameter)
-        return getMaterialMainPageList(Object.assign(parameter, this.queryParam))
+        return get{{ .EntityNameLower }}PageList(Object.assign(parameter, this.queryParam))
           .then(res => {
             if (res.result.data === null) {
               res.result.data = []
@@ -146,8 +146,8 @@ export default {
         okType: 'danger',
         cancelText: '取消',
         onOk: () => {
-          deleteMaterialMain({ id: record.record_id }).then(res => {
-            this.$message.info(`${record.chn_Name} 删除成功`)
+          delete{{ .EntityNameLower }}({ id: record.record_id }).then(res => {
+            this.$message.info(`${record.chn_name} 删除成功`)
             this.handleOk()
           })
         }

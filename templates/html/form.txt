@@ -1,0 +1,116 @@
+<template>
+  <a-modal
+    title="设备类别"
+    :visible="visible"
+    :confirmLoading="confirmLoading"
+    @ok="handleSubmit"
+    @cancel="handleCancel"
+    :maskClosable="false"
+  >
+    <a-spin :spinning="confirmLoading">
+      <a-form :form="form">
+        {{ .HTMLElementContent }}
+        <a-row class="form-row" :gutter="16">
+          <a-col :lg="24" :md="24" :sm="24">
+            <a-form-item
+              label="说明"
+              :labelCol="{lg: {span: 5}, sm: {span: 7}}"
+              :wrapperCol="{lg: {span: 19}, sm: {span: 17} }">
+              <a-textarea
+                rows="4"
+                placeholder="请输入说明"
+                v-decorator="[
+                  'briefexplain'
+                ]"
+              ></a-textarea>
+            </a-form-item>
+          </a-col>
+        </a-row>
+      </a-form>
+    </a-spin>
+  </a-modal>
+</template>
+
+<script>
+import { get{{ .EntityName }} } from '@/api/project/{{ .EntityNameLower }}'
+import pick from 'lodash.pick'
+
+export default {
+  data () {
+    return {
+      visible: false,
+      confirmLoading: false,
+      form: this.$form.createForm(this),
+      entityId: '',
+      entity: {
+{{ .HTMLEntityContent }}
+      }
+    }
+  },
+  methods: {
+    add () {
+      this.visible = true
+    },
+    clear () {
+      this.form.setFieldsValue(this.entity)
+      this.entityId = ''
+    },
+    edit (record) {
+      this.visible = true
+      this.$nextTick(() => {
+        this.loadEditInfo(record)
+      })
+    },
+    handleSubmit () {
+      const { form: { validateFields } } = this
+      this.confirmLoading = true
+      validateFields((errors, values) => {
+        if (!errors) {
+          console.log('values', values)
+          const action = this.entityId === '' ? 'add{{ .EntityName }}' : 'update{{ .EntityName }}'
+          values.record_id = this.entityId
+          values.actions = this.subData
+          this.$store.dispatch(action, values).then(res => {
+            console.log(res)
+            this.$notification['success']({
+              message: '成功通知',
+              description: this.entityId === '' ? '添加成功！' : '更新成功！'
+            })
+            this.visible = false
+            this.confirmLoading = false
+            this.clear()
+            this.$emit('ok', values)
+          }).catch(error => {
+            const errorData = pick(error.response.data, ['error'])
+            console.log(errorData)
+            this.$notification['error']({
+              message: '错误',
+              description: errorData.error.message
+            })
+          })
+            .finally(() => {
+              this.confirmLoading = false
+            })
+        } else {
+          this.confirmLoading = false
+        }
+      })
+    },
+    handleCancel () {
+      this.clear()
+      this.visible = false
+    },
+    loadEditInfo (data) {
+      const { form } = this
+      get{{ .EntityName }}(Object.assign(data.record_id))
+        .then(res => {
+          console.log(res)
+          const formData = pick(res, [{{ .HTMLEntitys }}])
+          this.entityId = formData.record_id
+          console.log('formData', formData)
+          form.setFieldsValue(formData)
+        })
+    }
+  }
+}
+</script>

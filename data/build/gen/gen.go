@@ -22,11 +22,15 @@ type GenStruct struct {
 	FileName            string
 	ProjectName         string
 	EntityName          string
+	EntityNameLower     string
 	EntityNote          string
 	EntityTableName     string
 	EntityContent       string
 	EntityToContent     string
 	EntitySchemaContent string
+	HTMLEntityContent   string
+	HTMLEntitys         string
+	HTMLElementContent  string
 }
 
 // GenElement 数据
@@ -58,6 +62,15 @@ func Execute() {
 	tInterface, err := template.ParseFiles("templates/interface.txt") // 找到其中需要替换的模板变量
 	checkErr(err)
 
+	tHTMList, err := template.ParseFiles("templates/html/list.txt") // 找到其中需要替换的模板变量
+	checkErr(err)
+
+	tHTMLForm, err := template.ParseFiles("templates/html/form.txt") // 找到其中需要替换的模板变量
+	checkErr(err)
+
+	tHTMLElementText, err := template.ParseFiles("templates/html/element/text.txt") // 找到其中需要替换的模板变量
+	checkErr(err)
+
 	f, err := excelize.OpenFile(config.GetInFilePath())
 	if err != nil {
 		fmt.Println(err)
@@ -81,7 +94,7 @@ func Execute() {
 			if ok, _ := regexp.MatchString(`^[^,]*([\(|（]+)[^,]*([a-zA-Z][a-zA-Z]+)_?([a-zA-Z]+)([\)|）]+)`, line); ok {
 
 				if len(genElements) > 0 {
-					pSchemaContent, pInterfaceContent := doGen(tEntity, tModel, tBll, tCtl, tSchema, tInterface, genStruct, genElements)
+					pSchemaContent, pInterfaceContent := doGen(tEntity, tModel, tBll, tCtl, tSchema, tInterface, tHTMList, tHTMLForm, tHTMLElementText, genStruct, genElements)
 					schemaContent += pSchemaContent + "\n"
 					interfaceContent += pInterfaceContent + "\n"
 				}
@@ -92,11 +105,19 @@ func Execute() {
 				tableName := row[1]
 				tableNote := row[0]
 				modelName := row[2]
+				entityNameLower := strings.ToLower(modelName[0:1]) + modelName[1:]
 
 				tableName = strings.ToUpper(model.GetCamelName(tableName))
 				fileName := strings.ToLower(model.GetCamelName(modelName))
 
-				genStruct = &GenStruct{FileName: fileName, ProjectName: config.GetProjectName(), EntityName: modelName, EntityTableName: tableName, EntityNote: tableNote}
+				genStruct = &GenStruct{
+					FileName:        fileName,
+					ProjectName:     config.GetProjectName(),
+					EntityName:      modelName,
+					EntityTableName: tableName,
+					EntityNote:      tableNote,
+					EntityNameLower: entityNameLower,
+				}
 
 			} else if !isTable {
 				if line == ",,,," {
@@ -119,52 +140,98 @@ func Execute() {
 		}
 
 		if len(genElements) > 0 {
-			pSchemaContent, pInterfaceContent := doGen(tEntity, tModel, tBll, tCtl, tSchema, tInterface, genStruct, genElements)
+			pSchemaContent, pInterfaceContent := doGen(tEntity, tModel, tBll, tCtl, tSchema, tInterface, tHTMList, tHTMLForm, tHTMLElementText, genStruct, genElements)
 			schemaContent += pSchemaContent + "\n"
 			interfaceContent += pInterfaceContent + "\n"
 		}
 	}
 
-	writeFile("schema", "s_project", "", schemaContent)
-	writeFile("interface", "m_project", "", interfaceContent)
+	writeFile("schema", "s_project", "", "go", schemaContent)
+	writeFile("interface", "m_project", "", "go", interfaceContent)
 }
 
 // 生成 文件
-func doGen(tEntity *template.Template, tModel *template.Template, tBll *template.Template, tCtl *template.Template, tSchema *template.Template, tInterface *template.Template, genStruct *GenStruct, genElements []GenElement) (pSchemaContent string, pInterfaceContent string) {
+func doGen(tEntity, tModel, tBll, tCtl, tSchema, tInterface, tHTMList, tHTMLForm, tHTMLElementText *template.Template,
+	genStruct *GenStruct, genElements []GenElement) (pSchemaContent string, pInterfaceContent string) {
 	fmt.Println(genStruct.EntityTableName, genStruct.EntityNote, genStruct.EntityName)
 
 	content := ""
 	toContent := ""
 	schemaContent := ""
+
+	htmlElementContent := ""
+	htmlEntityContent := ""
+	htmlEntity := ""
 	for _, v := range genElements {
 		pGorm, pType, pjson := genGorm(&v)
 		content += fmt.Sprintf("%s %s `%s` // %s \n", v.Name, pType, pGorm, v.Notes)
 		toContent += fmt.Sprintf("%s: a.%s,\n", v.Name, v.Name)
 		schemaContent += fmt.Sprintf("%s %s `%s` // %s \n", v.Name, pType, pjson, v.Notes)
+
+		buf := new(bytes.Buffer)
+		tHTMLElementText.Execute(buf, v) // 执行模板的替换
+		htmlElementContent += buf.String()
+
+		switch pType {
+		case "string":
+			htmlEntityContent += fmt.Sprintf(`        '%s': '',`+"\n", v.NameLower)
+		case "int", "int64":
+			htmlEntityContent += fmt.Sprintf(`        '%s': 0,`+"\n", v.NameLower)
+		case "*time.Time":
+			htmlEntityContent += fmt.Sprintf(`        '%s': '',`+"\n", v.NameLower)
+		case "bool":
+			htmlEntityContent += fmt.Sprintf(`        '%s': false,`+"\n", v.NameLower)
+		case "float64", "float32":
+			htmlEntityContent += fmt.Sprintf(`        '%s': 0,`+"\n", v.NameLower)
+		default:
+			htmlEntityContent += fmt.Sprintf(`        '%s': '',`+"\n", v.NameLower)
+		}
+		htmlEntity += fmt.Sprintf(`'%s', `, v.NameLower)
 	}
 	genStruct.EntityContent = content
 	genStruct.EntityToContent = toContent
 	genStruct.EntitySchemaContent = schemaContent
 
+	if htmlEntityContent[len(htmlEntityContent)-2:] == ",\n" {
+		htmlEntityContent = htmlEntityContent[:len(htmlEntityContent)-2]
+	}
+
+	if htmlEntity[len(htmlEntity)-2:] == ", " {
+		htmlEntity = htmlEntity[:len(htmlEntity)-2]
+	}
+	genStruct.HTMLEntityContent = htmlEntityContent
+	genStruct.HTMLEntitys = htmlEntity
+	genStruct.HTMLElementContent = htmlElementContent
+
 	// 输出到buf
 	buf := new(bytes.Buffer)
 	tEntity.Execute(buf, genStruct) // 执行模板的替换
-	writeFile("entity", "e_", genStruct.FileName, buf.String())
+	writeFile("entity", "e_", genStruct.FileName, "go", buf.String())
 
 	// 输出到buf
 	buf = new(bytes.Buffer)
 	tModel.Execute(buf, genStruct) // 执行模板的替换
-	writeFile("model", "m_", genStruct.FileName, buf.String())
+	writeFile("model", "m_", genStruct.FileName, "go", buf.String())
 
 	// 输出到buf
 	buf = new(bytes.Buffer)
 	tBll.Execute(buf, genStruct) // 执行模板的替换
-	writeFile("bll", "b_", genStruct.FileName, buf.String())
+	writeFile("bll", "b_", genStruct.FileName, "go", buf.String())
 
 	// 输出到buf
 	buf = new(bytes.Buffer)
 	tCtl.Execute(buf, genStruct) // 执行模板的替换
-	writeFile("ctl", "c_", genStruct.FileName, buf.String())
+	writeFile("ctl", "c_", genStruct.FileName, "go", buf.String())
+
+	// 输出到buf
+	buf = new(bytes.Buffer)
+	tHTMList.Execute(buf, genStruct) // 执行模板的替换
+	writeFile("html", "", genStruct.EntityName+"List", "html", buf.String())
+
+	// 输出到buf
+	buf = new(bytes.Buffer)
+	tHTMLForm.Execute(buf, genStruct) // 执行模板的替换
+	writeFile("html", "", genStruct.EntityName+"Form", "html", buf.String())
 
 	// 输出到buf
 	buf = new(bytes.Buffer)
@@ -200,8 +267,8 @@ func genGorm(v *GenElement) (string, string, string) {
 }
 
 // 保存文件
-func writeFile(stype, prefix, fname, content string) (string, bool) {
-	path := fmt.Sprintf("%s/%s/%s%s.go", config.GetOutDir(), stype, prefix, fname)
+func writeFile(stype, prefix, fname, suffix, content string) (string, bool) {
+	path := fmt.Sprintf("%s/%s/%s%s.%s", config.GetOutDir(), stype, prefix, fname, suffix)
 	return path, tools.WriteFile(path, []string{content}, true)
 }
 
