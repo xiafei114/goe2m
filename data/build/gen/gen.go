@@ -71,6 +71,9 @@ func Execute() {
 	tHTMLElementText, err := template.ParseFiles("templates/html/element/text.txt") // 找到其中需要替换的模板变量
 	checkErr(err)
 
+	tHTMLJs, err := template.ParseFiles("templates/html/js.txt") // 找到其中需要替换的模板变量
+	checkErr(err)
+
 	f, err := excelize.OpenFile(config.GetInFilePath())
 	if err != nil {
 		fmt.Println(err)
@@ -94,7 +97,7 @@ func Execute() {
 			if ok, _ := regexp.MatchString(`^[^,]*([\(|（]+)[^,]*([a-zA-Z][a-zA-Z]+)_?([a-zA-Z]+)([\)|）]+)`, line); ok {
 
 				if len(genElements) > 0 {
-					pSchemaContent, pInterfaceContent := doGen(tEntity, tModel, tBll, tCtl, tSchema, tInterface, tHTMList, tHTMLForm, tHTMLElementText, genStruct, genElements)
+					pSchemaContent, pInterfaceContent := doGen(tEntity, tModel, tBll, tCtl, tSchema, tInterface, tHTMList, tHTMLForm, tHTMLElementText, tHTMLJs, genStruct, genElements)
 					schemaContent += pSchemaContent + "\n"
 					interfaceContent += pInterfaceContent + "\n"
 				}
@@ -140,7 +143,7 @@ func Execute() {
 		}
 
 		if len(genElements) > 0 {
-			pSchemaContent, pInterfaceContent := doGen(tEntity, tModel, tBll, tCtl, tSchema, tInterface, tHTMList, tHTMLForm, tHTMLElementText, genStruct, genElements)
+			pSchemaContent, pInterfaceContent := doGen(tEntity, tModel, tBll, tCtl, tSchema, tInterface, tHTMList, tHTMLForm, tHTMLElementText, tHTMLJs, genStruct, genElements)
 			schemaContent += pSchemaContent + "\n"
 			interfaceContent += pInterfaceContent + "\n"
 		}
@@ -151,7 +154,7 @@ func Execute() {
 }
 
 // 生成 文件
-func doGen(tEntity, tModel, tBll, tCtl, tSchema, tInterface, tHTMList, tHTMLForm, tHTMLElementText *template.Template,
+func doGen(tEntity, tModel, tBll, tCtl, tSchema, tInterface, tHTMList, tHTMLForm, tHTMLElementText, tHTMLJs *template.Template,
 	genStruct *GenStruct, genElements []GenElement) (pSchemaContent string, pInterfaceContent string) {
 	fmt.Println(genStruct.EntityTableName, genStruct.EntityNote, genStruct.EntityName)
 
@@ -232,6 +235,11 @@ func doGen(tEntity, tModel, tBll, tCtl, tSchema, tInterface, tHTMList, tHTMLForm
 	buf = new(bytes.Buffer)
 	tHTMLForm.Execute(buf, genStruct) // 执行模板的替换
 	writeFile("vue", "", genStruct.EntityName+"Form", "vue", buf.String())
+
+	// 输出到buf
+	buf = new(bytes.Buffer)
+	tHTMLJs.Execute(buf, genStruct) // 执行模板的替换
+	writeFile("js", "", genStruct.EntityNameLower, "js", buf.String())
 
 	// 输出到buf
 	buf = new(bytes.Buffer)

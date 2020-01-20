@@ -1,0 +1,53 @@
+import { axios } from '@/utils/request'
+
+const router = '{{ .EntityNameLower }}'
+
+// {{ .EntityNote }}查询
+export function get{{ .EntityName }}PageList (parameter) {
+  return axios({
+    url: `/v1/${router}?q=page`,
+    method: 'get',
+    params: parameter
+  })
+}
+
+export function get{{ .EntityName }}List (parameter) {
+  return axios({
+    url: `/v1/${router}?q=list`,
+    method: 'get',
+    params: parameter
+  })
+}
+
+// 获得单一{{ .EntityNote }}
+export function get{{ .EntityName }} (id) {
+  return axios({
+    url: `/v1/${router}/${id}`,
+    method: 'get'
+  })
+}
+
+// 添加{{ .EntityNote }}
+export function add{{ .EntityName }} (data) {
+  return axios({
+    url: `/v1/${router}`,
+    method: 'post',
+    data
+  })
+}
+// 修改{{ .EntityNote }}
+export function update{{ .EntityName }} (id, data) {
+  return axios({
+    url: `/v1/${router}/${id}`,
+    method: 'put',
+    data
+  })
+}
+
+// 删除{{ .EntityNote }}
+export function delete{{ .EntityName }} (params) {
+  return axios({
+    url: `/v1/${router}/${params.id}`,
+    method: 'delete'
+  })
+}
