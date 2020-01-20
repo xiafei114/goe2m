@@ -226,12 +226,12 @@ func doGen(tEntity, tModel, tBll, tCtl, tSchema, tInterface, tHTMList, tHTMLForm
 	// 输出到buf
 	buf = new(bytes.Buffer)
 	tHTMList.Execute(buf, genStruct) // 执行模板的替换
-	writeFile("html", "", genStruct.EntityName+"List", "html", buf.String())
+	writeFile("vue", "", genStruct.EntityName+"List", "vue", buf.String())
 
 	// 输出到buf
 	buf = new(bytes.Buffer)
 	tHTMLForm.Execute(buf, genStruct) // 执行模板的替换
-	writeFile("html", "", genStruct.EntityName+"Form", "html", buf.String())
+	writeFile("vue", "", genStruct.EntityName+"Form", "vue", buf.String())
 
 	// 输出到buf
 	buf = new(bytes.Buffer)

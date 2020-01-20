@@ -88,7 +88,7 @@ export default {
       // 加载数据方法 必须为 Promise 对象
       loadData: parameter => {
         console.log('loadData.parameter', parameter)
-        return get{{ .EntityNameLower }}PageList(Object.assign(parameter, this.queryParam))
+        return get{{ .EntityName }}PageList(Object.assign(parameter, this.queryParam))
           .then(res => {
             if (res.result.data === null) {
               res.result.data = []
@@ -146,7 +146,7 @@ export default {
         okType: 'danger',
         cancelText: '取消',
         onOk: () => {
-          delete{{ .EntityNameLower }}({ id: record.record_id }).then(res => {
+          delete{{ .EntityName }}({ id: record.record_id }).then(res => {
             this.$message.info(`${record.chn_name} 删除成功`)
             this.handleOk()
           })

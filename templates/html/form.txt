@@ -1,6 +1,6 @@
 <template>
   <a-modal
-    title="设备类别"
+    title="{{ .EntityNote }}"
     :visible="visible"
     :confirmLoading="confirmLoading"
     @ok="handleSubmit"
