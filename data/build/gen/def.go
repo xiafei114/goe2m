@@ -35,6 +35,7 @@ var TypeMysqlDicMp = map[string]string{
 	"tinytext":            "string",
 	"longblob":            "string",
 	"blob":                "string",
+	"bool":                "bool",
 }
 
 // TypeMysqlMatchMp Fuzzy Matching Types.模糊匹配类型

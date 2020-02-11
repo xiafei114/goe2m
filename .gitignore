@@ -17,3 +17,4 @@
 ~$example.xlsx
 target
 __debug_bin
+*.xlsx
