@@ -2,8 +2,8 @@
           <a-col :lg="24" :md="24" :sm="24">
             <a-form-item
               label="{{ .Notes }}"
-              :labelCol="{lg: {span: 5}, sm: {span: 7}}"
-              :wrapperCol="{lg: {span: 19}, sm: {span: 17} }"
+              :labelCol="labelColBig"
+              :wrapperCol="wrapperColBig"
             >
               <a-input v-decorator="['{{ .NameLower }}', {rules: [{required: false, message: '请输入{{ .Notes }}'}]}]"/>
             </a-form-item>
