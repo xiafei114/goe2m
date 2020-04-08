@@ -15,7 +15,7 @@
             <a-form-item
               label="说明"
               :labelCol="labelColBig"
-              :wrapperCol="wrapperColBig"
+              :wrapperCol="wrapperColBig">
               <a-textarea
                 rows="4"
                 placeholder="请输入说明"
