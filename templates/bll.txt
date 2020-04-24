@@ -76,13 +76,14 @@ func (a *{{ .EntityName }}) Create(ctx context.Context, item schemaProject.{{ .E
 	// }
 
 	item.RecordID = util.MustUUID()
-	item.UpdateUserID = icontext.GetUserID(ctx)
+	// item.UpdateUserID = icontext.GetUserID(ctx)
 	// item.CompanyID = icontext.GetCompanyID(ctx)
 	err := a.{{ .EntityName }}Model.Create(ctx, item)
 	if err != nil {
 		return nil, err
 	}
-	return a.Get(ctx, item.RecordID)
+	// return a.Get(ctx, recordID)
+	return a.{{ .EntityName }}Model.BuildCacheEntity(ctx, item.RecordID)
 }
 
 // Update 更新数据
@@ -104,7 +105,8 @@ func (a *{{ .EntityName }}) Update(ctx context.Context, recordID string, item sc
 	if err != nil {
 		return nil, err
 	}
-	return a.Get(ctx, recordID)
+	// return a.Get(ctx, recordID)
+	return a.{{ .EntityName }}Model.BuildCacheEntity(ctx, item.RecordID)
 }
 
 // Delete 删除数据

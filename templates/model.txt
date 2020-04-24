@@ -13,13 +13,14 @@ import (
 )
 
 // New{{ .EntityName }} 创建{{ .EntityName }}存储实例
-func New{{ .EntityName }}(db *gormplus.DB) *{{ .EntityName }} {
-	return &{{ .EntityName }}{db}
+func New{{ .EntityName }}(db *gormplus.DB, redis *redisgo.Cacher) *{{ .EntityName }} {
+	return &{{ .EntityName }}{db, redis}
 }
 
 // {{ .EntityName }} {{ .EntityName }}存储
 type {{ .EntityName }} struct {
 	db *gormplus.DB
+	redis *redisgo.Cacher
 }
 
 func (a *{{ .EntityName }}) getFuncName(name string) string {
@@ -84,6 +85,61 @@ func (a *{{ .EntityName }}) Get(ctx context.Context, recordID string, opts ...sc
 
 	sitem := item.ToSchema{{ .EntityName }}()
 	return sitem, nil
+}
+
+// BuildCacheEntity 缓存
+func (a *{{ .EntityName }}) BuildCacheEntity(ctx context.Context, recordID string) (*schemaProject.{{ .EntityName }}, error) {
+	item := schemaProject.{{ .EntityName }}{RecordID: recordID}
+	key := item.Get{{ .EntityName }}RecordIDKey()
+
+	sItem, err := a.Get(ctx, item.RecordID)
+
+	if err != nil {
+		return nil, err
+	}
+
+	a.redis.Set(key, sItem, 3600)
+	return sItem, nil
+}
+
+// GetCacheEntity 从缓存中获得内容
+func (a *{{ .EntityName }}) GetCacheEntity(ctx context.Context, recordID string) (*schemaProject.{{ .EntityName }}, error) {
+	span := logger.StartSpan(ctx, "从缓存查询指定数据", a.getFuncName("GetCacheEntity"))
+	defer span.Finish()
+	var item *schemaProject.{{ .EntityName }}
+	cItem := schemaProject.{{ .EntityName }}{RecordID: recordID}
+	key := cItem.Get{{ .EntityName }}RecordIDKey()
+
+	var ok bool
+	var err error
+	b := true
+	if ok, _ = a.redis.Exists(key); ok {
+		err := a.redis.GetObject(key, &item)
+		if err != nil {
+			log.Println(err)
+			log.Printf("error key %s", key)
+		} else {
+			b = false
+		}
+	}
+
+	if b {
+		var eItem entity.{{ .EntityName }}
+		db := entity.Get{{ .EntityName }}DB(ctx, a.db).Where("record_id=?", recordID)
+		ok, err = entity.Get{{ .EntityName }}DB(ctx, a.db).FindOne(db, &eItem)
+
+		if err != nil {
+			span.Errorf(err.Error())
+			return nil, errors.New("查询指定数据发生错误")
+		}
+
+		if ok {
+			item = eItem.ToSchema{{ .EntityName }}()
+			a.redis.Set(key, item, 3600)
+		}
+	}
+
+	return item, nil
 }
 
 // Create 创建数据

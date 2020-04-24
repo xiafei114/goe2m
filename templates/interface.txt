@@ -4,6 +4,10 @@ type I{{ .EntityName }} interface {
 	Query(ctx context.Context, params schema.CommonQueryParam, opts ...schema.CommonQueryOptions) (*schema.CommonQueryResult, error)
 	// 查询指定数据
 	Get(ctx context.Context, recordID string, opts ...schema.CommonQueryOptions) (*schemaProject.{{ .EntityName }}, error)
+	// 建立缓存
+	BuildCacheEntity(ctx context.Context, recordID string) (*schemaProject.{{ .EntityName }}, error)
+	// GetCacheEntity 从缓存中获得内容
+	GetCacheEntity(ctx context.Context, recordID string) (*schemaProject.{{ .EntityName }}, error)
 	// 创建数据
 	Create(ctx context.Context, item schemaProject.{{ .EntityName }}) error
 	// 更新数据
