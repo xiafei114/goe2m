@@ -10,6 +10,8 @@ import (
 	"{{ .ProjectName }}/pkg/errors"
 	"{{ .ProjectName }}/pkg/gormplus"
 	"{{ .ProjectName }}/pkg/logger"
+
+	"github.com/aiscrm/redisgo"
 )
 
 // New{{ .EntityName }} 创建{{ .EntityName }}存储实例
