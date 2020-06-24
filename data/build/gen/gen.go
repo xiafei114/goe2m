@@ -39,6 +39,7 @@ type GenElement struct {
 	NameLower string              // 小写
 	Type      string              // Type.类型标记
 	Notes     string              // Notes.注释
+	Remarks   string              // Remarks.注释
 	Tags      map[string][]string // tages.标记
 }
 
@@ -129,6 +130,7 @@ func Execute() {
 				eName := row[1]
 				etype := row[2]
 				eNote := row[0]
+				eRemark := row[3]
 
 				nameLower := ""
 
@@ -136,7 +138,7 @@ func Execute() {
 					nameLower = strings.ToLower(model.GetCamelName(eName))
 				}
 
-				element := GenElement{Name: eName, Type: etype, Notes: eNote, NameLower: nameLower}
+				element := GenElement{Name: eName, Type: etype, Notes: eNote, NameLower: nameLower, Remarks: eRemark}
 				genElements = append(genElements, element)
 			}
 
@@ -167,9 +169,9 @@ func doGen(tEntity, tModel, tBll, tCtl, tSchema, tInterface, tHTMList, tHTMLForm
 	htmlEntity := ""
 	for _, v := range genElements {
 		pGorm, pType, pjson := genGorm(&v)
-		content += fmt.Sprintf("%s %s `%s` // %s \n", v.Name, pType, pGorm, v.Notes)
+		content += fmt.Sprintf("%s %s `%s` // %s  %s\n", v.Name, pType, pGorm, v.Notes, v.Remarks)
 		toContent += fmt.Sprintf("%s: a.%s,\n", v.Name, v.Name)
-		schemaContent += fmt.Sprintf("%s %s `%s` // %s \n", v.Name, pType, pjson, v.Notes)
+		schemaContent += fmt.Sprintf("%s %s `%s` // %s %s \n", v.Name, pType, pjson, v.Notes, v.Remarks)
 
 		buf := new(bytes.Buffer)
 		tHTMLElementText.Execute(buf, v) // 执行模板的替换
