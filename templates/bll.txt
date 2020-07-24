@@ -76,7 +76,8 @@ func (a *{{ .EntityName }}) Create(ctx context.Context, item schemaProject.{{ .E
 	// }
 
 	item.RecordID = util.MustUUID()
-	// item.UpdateUserID = icontext.GetUserID(ctx)
+	item.CreateUser = icontext.GetUserID(ctx)
+	item.UpdateUser = icontext.GetUserID(ctx)
 	// item.CompanyID = icontext.GetCompanyID(ctx)
 	err := a.{{ .EntityName }}Model.Create(ctx, item)
 	if err != nil {
@@ -101,6 +102,7 @@ func (a *{{ .EntityName }}) Update(ctx context.Context, recordID string, item sc
 	// 	}
 	// }
 
+	item.UpdateUser = icontext.GetUserID(ctx)
 	err = a.{{ .EntityName }}Model.Update(ctx, recordID, item)
 	if err != nil {
 		return nil, err
