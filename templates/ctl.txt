@@ -19,9 +19,9 @@ func New{{ .EntityName }}(b *bll.Common) *{{ .EntityName }} {
 	}
 }
 
-// {{ .EntityName }} {{ .EntityName }}
+// {{ .EntityName }} {{ .EntityNote }}
 // @Name {{ .EntityName }}
-// @Description {{ .EntityName }}
+// @Description {{ .EntityNote }}
 type {{ .EntityName }} struct {
 	{{ .EntityName }}Bll *projectBll.{{ .EntityName }}
 }
