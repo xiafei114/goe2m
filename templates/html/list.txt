@@ -31,6 +31,8 @@
       ref="table"
       size="default"
       rowKey="record_id"
+      :pageNum="pageNo"
+      :pageSize="pageSize"
       :columns="columns"
       :data="loadData"
       v-if="$auth('{{ .EntityNameLower }}.list') && loading"
