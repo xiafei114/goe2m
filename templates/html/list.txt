@@ -9,7 +9,7 @@
             </a-form-item>
           </a-col>
           <a-col :md="6" :sm="24">
-            <a-form-item label="仓库名称">
+            <a-form-item label="名称">
               <a-input v-model="queryParam.chn_name" placeholder=""/>
             </a-form-item>
           </a-col>
@@ -33,7 +33,7 @@
       rowKey="record_id"
       :columns="columns"
       :data="loadData"
-      v-if="$auth('{{ .EntityNameLower }}.list')"
+      v-if="$auth('{{ .EntityNameLower }}.list') && loading"
     >
       <span slot="action" slot-scope="text, record">
         <template>
@@ -49,6 +49,7 @@
 
 <script>
 import moment from 'moment/moment'
+import { setPageSearchParam, getPageSearchParam } from '@/utils/page'
 import { STable } from '@/components'
 import entityForm from './{{ .EntityName }}Form'
 import { get{{ .EntityName }}PageList, delete{{ .EntityName }} } from '@/api/project/{{ .EntityNameLower }}'
@@ -65,6 +66,10 @@ export default {
       advanced: false,
       // 查询参数
       queryParam: {},
+      search_page_key: '{{ .EntityName }}List',
+      pageNo: 1,
+      pageSize: 10,
+      loading: false,
       // 表头
       columns: [
         {
@@ -72,7 +77,7 @@ export default {
           dataIndex: 'index_code'
         },
         {
-          title: '仓库名称',
+          title: '名称',
           dataIndex: 'chn_name'
         },
         {
@@ -87,7 +92,14 @@ export default {
       ],
       // 加载数据方法 必须为 Promise 对象
       loadData: parameter => {
-        console.log('loadData.parameter', parameter)
+        const pageParam = {
+          pageNo: parameter.pageNo,
+          pageSize: parameter.pageSize
+        }
+
+        // 保存查询条件
+        setPageSearchParam(this.search_page_key, JSON.stringify(pageParam))
+
         return get{{ .EntityName }}PageList(Object.assign(parameter, this.queryParam))
           .then(res => {
             if (res.result.data === null) {
@@ -107,8 +119,13 @@ export default {
           onChange: this.onSelectChange
         }
       },
-      optionAlertShow: false
+      optionAlertShow: false,
+      timeKey: ''
     }
+  },
+  mounted () {
+    this.timeKey = moment().locale('zh-cn').format('YYYY-MM-DD HH:mm:ss')
+    this.initSearchPage()
   },
   filters: {
   },
@@ -116,6 +133,15 @@ export default {
     this.tableOption()
   },
   methods: {
+    initSearchPage () {
+      const pageParam = getPageSearchParam(this.search_page_key)
+      this.pageNo = pageParam.pageNo
+      this.pageSize = pageParam.pageSize
+      this.loading = true
+    },
+    searchReset () {
+      this.queryParam = {}
+    },
     tableOption () {
       if (!this.optionAlertShow) {
         this.options = {
