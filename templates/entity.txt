@@ -51,6 +51,13 @@ func (a Schema{{ .EntityName }}) To{{ .EntityName }}() *{{ .EntityName }} {
 	return item
 }
 
+// To{{ .EntityName }}Map 转换为{{ .EntityName }}实体
+func (a Schema{{ .EntityName }}) To{{ .EntityName }}Map() map[string]interface{} {
+	item := make(map[string]interface{})
+	{{ .EntityToContentMap }}
+	return item
+}
+
 // ToSchema{{ .EntityName }} 转换为{{ .EntityName }}对象
 func (a {{ .EntityName }}) ToSchema{{ .EntityName }}() *schema.{{ .EntityName }} {
 	item := &schema.{{ .EntityName }}{

@@ -27,6 +27,7 @@ type GenStruct struct {
 	EntityTableName     string
 	EntityContent       string
 	EntityToContent     string
+	EntityToContentMap  string
 	EntitySchemaContent string
 	HTMLEntityContent   string
 	HTMLEntitys         string
@@ -162,6 +163,7 @@ func doGen(tEntity, tModel, tBll, tCtl, tSchema, tInterface, tHTMList, tHTMLForm
 
 	content := ""
 	toContent := ""
+	toContentMap := ""
 	schemaContent := ""
 
 	htmlElementContent := ""
@@ -171,6 +173,7 @@ func doGen(tEntity, tModel, tBll, tCtl, tSchema, tInterface, tHTMList, tHTMLForm
 		pGorm, pType, pjson := genGorm(&v)
 		content += fmt.Sprintf("%s %s `%s` // %s  %s\n", v.Name, pType, pGorm, v.Notes, v.Remarks)
 		toContent += fmt.Sprintf("%s: a.%s,\n", v.Name, v.Name)
+		toContentMap += fmt.Sprintf(`item["%s"] = a.%s`, v.NameLower, v.Name) + "\n"
 		schemaContent += fmt.Sprintf("%s %s `%s` // %s %s \n", v.Name, pType, pjson, v.Notes, v.Remarks)
 
 		buf := new(bytes.Buffer)
@@ -195,6 +198,7 @@ func doGen(tEntity, tModel, tBll, tCtl, tSchema, tInterface, tHTMList, tHTMLForm
 	}
 	genStruct.EntityContent = content
 	genStruct.EntityToContent = toContent
+	genStruct.EntityToContentMap = toContentMap
 	genStruct.EntitySchemaContent = schemaContent
 
 	if htmlEntityContent[len(htmlEntityContent)-2:] == ",\n" {
