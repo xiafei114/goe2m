@@ -167,7 +167,7 @@ func (a *{{ .EntityName }}) Update(ctx context.Context, recordID string, item sc
 	defer span.Finish()
 
 	{{ .EntityNameLower }} := entity.Schema{{ .EntityName }}(item).To{{ .EntityName }}()
-	result := entity.Get{{ .EntityName }}DB(ctx, a.db).Where("record_id=?", recordID).Omit("record_id", "update_user_id").Updates({{ .EntityNameLower }})
+	result := entity.Get{{ .EntityName }}DB(ctx, a.db).Where("record_id=?", recordID).Omit("record_id", "update_user").Updates({{ .EntityNameLower }})
 	if err := result.Error; err != nil {
 		span.Errorf(err.Error())
 		return errors.New("更新数据发生错误")
@@ -181,7 +181,7 @@ func (a *{{ .EntityName }}) UpdateMap(ctx context.Context, recordID string, item
 	defer span.Finish()
 
 	{{ .EntityNameLower }} := entity.Schema{{ .EntityName }}(item).To{{ .EntityName }}Map()
-	result := entity.Get{{ .EntityName }}DB(ctx, a.db).Where("record_id=?", recordID).Omit("record_id", "update_user_id").Updates({{ .EntityNameLower }})
+	result := entity.Get{{ .EntityName }}DB(ctx, a.db).Where("record_id=?", recordID).Omit("record_id", "update_user").Updates({{ .EntityNameLower }})
 	if err := result.Error; err != nil {
 		span.Errorf(err.Error())
 		return errors.New("更新数据发生错误")
