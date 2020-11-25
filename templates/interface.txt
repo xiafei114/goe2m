@@ -8,6 +8,8 @@ type I{{ .EntityName }} interface {
 	BuildCacheEntity(ctx context.Context, recordID string) (*schemaProject.{{ .EntityName }}, error)
 	// GetCacheEntity 从缓存中获得内容
 	GetCacheEntity(ctx context.Context, recordID string) (*schemaProject.{{ .EntityName }}, error)
+	// 删除缓存
+	RemoveCacheEntity(ctx context.Context, recordID string) error
 	// 创建数据
 	Create(ctx context.Context, item schemaProject.{{ .EntityName }}) error
 	// 更新数据

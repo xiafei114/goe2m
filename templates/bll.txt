@@ -113,10 +113,15 @@ func (a *{{ .EntityName }}) Update(ctx context.Context, recordID string, item sc
 
 // Delete 删除数据
 func (a *{{ .EntityName }}) Delete(ctx context.Context, recordID string) error {
-	err := a.{{ .EntityName }}Model.Delete(ctx, recordID)
+	err := a.{{ .EntityName }}Model.RemoveCacheEntity(ctx, recordID)
 	if err != nil {
 		return err
 	}
+	err = a.{{ .EntityName }}Model.Delete(ctx, recordID)
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 

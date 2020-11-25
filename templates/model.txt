@@ -144,6 +144,19 @@ func (a *{{ .EntityName }}) GetCacheEntity(ctx context.Context, recordID string)
 	return item, nil
 }
 
+// RemoveCacheEntity 删除缓存
+func (a *{{ .EntityName }}) RemoveCacheEntity(ctx context.Context, recordID string) error {
+	span := logger.StartSpan(ctx, "删除缓存", a.getFuncName("RemoveCacheEntity"))
+	defer span.Finish()
+	cItem := schemaProject.{{ .EntityName }}{RecordID: recordID}
+	key := cItem.Get{{ .EntityName }}RecordIDKey()
+	if ok, _ := a.redis.Exists(key); ok {
+		err := a.redis.Del(key)
+		return err
+	}
+	return nil
+}
+
 // Create 创建数据
 func (a *{{ .EntityName }}) Create(ctx context.Context, item schemaProject.{{ .EntityName }}) error {
 	span := logger.StartSpan(ctx, "创建数据", a.getFuncName("Create"))
