@@ -3,6 +3,7 @@ package model
 import (
 	"context"
 	"fmt"
+	"log"
 
 	entity "{{ .ProjectName }}/internal/app/project/model/gorm/entity/project"
 	schema "{{ .ProjectName }}/internal/app/project/schema"
