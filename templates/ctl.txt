@@ -69,14 +69,15 @@ func (a *{{ .EntityName }}) QueryPage(c *gin.Context) {
 // QueryList 查询数据
 // @Summary 查询数据
 // @Param Authorization header string false "Bearer 用户令牌"
-// @Success 200 []projectSchema.{{ .EntityName }} "分页查询结果：{data:列表数据}"
+// @Param parent_id query string false "父ID"
+// @Success 200 []projectSchema.{{ .EntityName }} "查询结果：{data:列表数据}"
 // @Failure 400 schema.HTTPError "{error:{code:0,message:未知的查询类型}}"
 // @Failure 401 schema.HTTPError "{error:{code:0,message:未授权}}"
 // @Failure 500 schema.HTTPError "{error:{code:0,message:服务器错误}}"
 // @Router GET /api/v1/{{ .EntityNameLower }}?q=list
 func (a *{{ .EntityName }}) QueryList(c *gin.Context) {
 	var params schema.CommonQueryParam
-	params.IndexCode = c.Query("index_Code")
+	params.ParentID = c.Query("parent_id")
 
 	items, err := a.{{ .EntityName }}Bll.QueryList(ginplus.NewContext(c), params)
 	if err != nil {
