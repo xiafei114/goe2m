@@ -103,7 +103,7 @@ func (a *{{ .EntityName }}) Update(ctx context.Context, recordID string, item sc
 	// }
 
 	//  item.UpdateUser = icontext.GetUserID(ctx)
-	err = a.{{ .EntityName }}Model.UpdateMap(ctx, recordID, item)
+	err = a.{{ .EntityName }}Model.Update(ctx, recordID, item)
 	if err != nil {
 		return nil, err
 	}
