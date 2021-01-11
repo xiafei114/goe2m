@@ -176,8 +176,8 @@ func (a *{{ .EntityName }}) Create(ctx context.Context, item schemaProject.{{ .E
 }
 
 // Update 更新数据
-func (a *{{ .EntityName }}) Update(ctx context.Context, recordID string, item schemaProject.{{ .EntityName }}) error {
-	span := logger.StartSpan(ctx, "更新数据", a.getFuncName("Update"))
+func (a *{{ .EntityName }}) UpdateItem(ctx context.Context, recordID string, item schemaProject.{{ .EntityName }}) error {
+	span := logger.StartSpan(ctx, "更新数据", a.getFuncName("UpdateItem"))
 	defer span.Finish()
 
 	{{ .EntityNameLower }} := entity.Schema{{ .EntityName }}(item).To{{ .EntityName }}()
@@ -190,12 +190,25 @@ func (a *{{ .EntityName }}) Update(ctx context.Context, recordID string, item sc
 }
 
 // UpdateMap 更新数据
-func (a *{{ .EntityName }}) UpdateMap(ctx context.Context, recordID string, item schemaProject.{{ .EntityName }}) error {
-	span := logger.StartSpan(ctx, "更新数据", a.getFuncName("UpdateMap"))
+func (a *{{ .EntityName }}) UpdateMapItem(ctx context.Context, recordID string, item schemaProject.{{ .EntityName }}) error {
+	span := logger.StartSpan(ctx, "更新数据", a.getFuncName("UpdateMapItem"))
 	defer span.Finish()
 
 	{{ .EntityNameLower }} := entity.Schema{{ .EntityName }}(item).To{{ .EntityName }}Map()
 	result := entity.Get{{ .EntityName }}DB(ctx, a.db).Where("record_id=?", recordID).Omit("record_id", "update_user").Updates({{ .EntityNameLower }})
+	if err := result.Error; err != nil {
+		span.Errorf(err.Error())
+		return errors.New("更新数据发生错误")
+	}
+	return nil
+}
+
+// UpdateMap 更新数据
+func (a *{{ .EntityName }}) UpdateMap(ctx context.Context, recordID string, mapItem map[string]interface{}) error {
+	span := logger.StartSpan(ctx, "更新数据", a.getFuncName("UpdateMap"))
+	defer span.Finish()
+
+	result := entity.Get{{ .EntityName }}DB(ctx, a.db).Where("record_id=?", recordID).Omit("record_id", "update_user").Updates(mapItem)
 	if err := result.Error; err != nil {
 		span.Errorf(err.Error())
 		return errors.New("更新数据发生错误")

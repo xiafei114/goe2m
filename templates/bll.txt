@@ -88,7 +88,7 @@ func (a *{{ .EntityName }}) Create(ctx context.Context, item schemaProject.{{ .E
 }
 
 // Update 更新数据
-func (a *{{ .EntityName }}) Update(ctx context.Context, recordID string, item schemaProject.{{ .EntityName }}) (*schemaProject.{{ .EntityName }}, error) {
+func (a *{{ .EntityName }}) Update(ctx context.Context, recordID string, item schemaProject.{{ .EntityName }}, updateType bool) (*schemaProject.{{ .EntityName }}, error) {
 	oldItem, err := a.{{ .EntityName }}Model.Get(ctx, recordID)
 	if err != nil {
 		return nil, err
@@ -103,7 +103,12 @@ func (a *{{ .EntityName }}) Update(ctx context.Context, recordID string, item sc
 	// }
 
 	//  item.UpdateUser = icontext.GetUserID(ctx)
-	err = a.{{ .EntityName }}Model.Update(ctx, recordID, item)
+	if updateType {
+		err = a.{{ .EntityName }}Model.UpdateMapItem(ctx, recordID, item)
+	} else {
+		err = a.{{ .EntityName }}Model.UpdateItem(ctx, recordID, item)
+	}
+
 	if err != nil {
 		return nil, err
 	}

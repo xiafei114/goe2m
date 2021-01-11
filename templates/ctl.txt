@@ -12,6 +12,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+
 // New{{ .EntityName }} 创建{{ .EntityName }}控制器
 func New{{ .EntityName }}(b *bll.Common) *{{ .EntityName }} {
 	return &{{ .EntityName }}{
@@ -24,6 +25,11 @@ func New{{ .EntityName }}(b *bll.Common) *{{ .EntityName }} {
 // @Description {{ .EntityNote }}
 type {{ .EntityName }} struct {
 	{{ .EntityName }}Bll *projectBll.{{ .EntityName }}
+}
+
+// 为了生成swagger写的累赘代码
+func (a *{{ .EntityName }}) ctlInit() {
+	schema.Init()
 }
 
 // Query 查询数据
@@ -41,7 +47,7 @@ func (a *{{ .EntityName }}) Query(c *gin.Context) {
 // QueryPage 查询分页数据
 // @Summary 查询分页数据
 // @Param Authorization header string false "Bearer 用户令牌"
-// @Param current query int true "分页索引" 1
+// @Param pageNo query int true "分页索引" 1
 // @Param pageSize query int true "分页大小" 10
 // @Param index_code query string false "编号"
 // @Param chn_name query string false "名称"
@@ -134,6 +140,7 @@ func (a *{{ .EntityName }}) Create(c *gin.Context) {
 // @Param Authorization header string false "Bearer 用户令牌"
 // @Param id path string true "记录ID"
 // @Param body body projectSchema.{{ .EntityName }} true
+// @Param use_map_update query int false "用户类别(1：是、0：否)"
 // @Success 200 projectSchema.{{ .EntityName }}
 // @Failure 400 schema.HTTPError "{error:{code:0,message:无效的请求参数}}"
 // @Failure 401 schema.HTTPError "{error:{code:0,message:未授权}}"
@@ -146,7 +153,9 @@ func (a *{{ .EntityName }}) Update(c *gin.Context) {
 		return
 	}
 
-	nitem, err := a.{{ .EntityName }}Bll.Update(ginplus.NewContext(c), c.Param("id"), item)
+	useMapUpdate := util.S(c.Query("use_map_update")).Int()
+
+	nitem, err := a.{{ .EntityName }}Bll.Update(ginplus.NewContext(c), c.Param("id"), item, useMapUpdate == 1)
 	if err != nil {
 		ginplus.ResError(c, err)
 		return
@@ -203,9 +212,4 @@ func (a *{{ .EntityName }}) Disable(c *gin.Context) {
 		return
 	}
 	ginplus.ResOK(c)
-}
-
-// 为了生成swagger写的累赘代码
-func (a *{{ .EntityName }}) ctlInit() {
-	schema.Init()
 }
