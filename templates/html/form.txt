@@ -10,22 +10,6 @@
     <a-spin :spinning="confirmLoading">
       <a-form :form="form">
 {{ .HTMLElementContent }}
-        <a-row class="form-row" :gutter="16">
-          <a-col :lg="24" :md="24" :sm="24">
-            <a-form-item
-              label="说明"
-              :labelCol="labelColBig"
-              :wrapperCol="wrapperColBig">
-              <a-textarea
-                rows="4"
-                placeholder="请输入说明"
-                v-decorator="[
-                  'briefexplain'
-                ]"
-              ></a-textarea>
-            </a-form-item>
-          </a-col>
-        </a-row>
       </a-form>
     </a-spin>
   </a-modal>

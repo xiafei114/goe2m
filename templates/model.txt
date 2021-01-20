@@ -175,7 +175,7 @@ func (a *{{ .EntityName }}) Create(ctx context.Context, item schemaProject.{{ .E
 	})
 }
 
-// Update 更新数据
+// UpdateItem 更新数据
 func (a *{{ .EntityName }}) UpdateItem(ctx context.Context, recordID string, item schemaProject.{{ .EntityName }}) error {
 	span := logger.StartSpan(ctx, "更新数据", a.getFuncName("UpdateItem"))
 	defer span.Finish()
@@ -189,7 +189,7 @@ func (a *{{ .EntityName }}) UpdateItem(ctx context.Context, recordID string, ite
 	return nil
 }
 
-// UpdateMap 更新数据
+// UpdateMapItem 更新数据
 func (a *{{ .EntityName }}) UpdateMapItem(ctx context.Context, recordID string, item schemaProject.{{ .EntityName }}) error {
 	span := logger.StartSpan(ctx, "更新数据", a.getFuncName("UpdateMapItem"))
 	defer span.Finish()
