@@ -140,7 +140,7 @@ func (a *{{ .EntityName }}) Create(c *gin.Context) {
 // @Param Authorization header string false "Bearer 用户令牌"
 // @Param id path string true "记录ID"
 // @Param body body projectSchema.{{ .EntityName }} true
-// @Param use_map_update query int false "用户类别(1：是、0：否)"
+// @Param use_map_update query int false "是否使用map更新(1：是、0：否)"
 // @Success 200 projectSchema.{{ .EntityName }}
 // @Failure 400 schema.HTTPError "{error:{code:0,message:无效的请求参数}}"
 // @Failure 401 schema.HTTPError "{error:{code:0,message:未授权}}"
