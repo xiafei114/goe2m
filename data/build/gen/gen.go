@@ -275,6 +275,15 @@ func genGorm(v *GenElement) (string, string, string) {
 		}
 	}
 
+	switch strings.ToLower(v.Type) {
+	case "text":
+		gorm += "type:text;"
+	case "longtext":
+		gorm += "type:longtext;"
+	case "tinytext":
+		gorm += "type:tinytext;"
+	}
+
 	// fmt.Println(v.Name, stype)
 
 	return fmt.Sprintf("gorm:\"%s\"", gorm), stype, fmt.Sprintf("json:\"%s\" swaggo:\"false,%s\"", v.NameLower, v.Notes)
