@@ -96,7 +96,7 @@ func Execute() {
 
 			isTable := line == newLine
 
-			if ok, _ := regexp.MatchString(`^[^,]*([\(|（]+)[^,]*([a-zA-Z][a-zA-Z]+)_?([a-zA-Z]+)([\)|）]+)`, line); ok {
+			if ok, _ := regexp.MatchString(`^[^,]*([\(|（]+)[^,]*([a-zA-Z][a-zA-Z]+)_?([a-zA-Z]+)([0-9]*)([\)|）]+)`, line); ok {
 
 				if len(genElements) > 0 {
 					pSchemaContent, pInterfaceContent := doGen(tEntity, tModel, tBll, tCtl, tSchema, tInterface, tHTMList, tHTMLForm, tHTMLElementText, tHTMLJs, genStruct, genElements)
