@@ -129,7 +129,7 @@ func Execute() {
 				if line == ",,,," {
 					continue
 				}
-				eName := row[1]
+				eName := Capitalize(row[1])
 				etype := row[2]
 				eNote := row[0]
 				eRemark := row[3]
@@ -155,6 +155,26 @@ func Execute() {
 
 	writeFile("schema", "s_project", "", "go", schemaContent)
 	writeFile("interface", "m_project", "", "go", interfaceContent)
+}
+
+// Capitalize 字符首字母大写
+func Capitalize(str string) string {
+	var upperStr string
+	vv := []rune(str) // 后文有介绍
+	for i := 0; i < len(vv); i++ {
+		if i == 0 {
+			if vv[i] >= 97 && vv[i] <= 122 { // 后文有介绍
+				vv[i] -= 32 // string的码表相差32位
+				upperStr += string(vv[i])
+			} else {
+				fmt.Println("Not begins with lowercase letter,")
+				return str
+			}
+		} else {
+			upperStr += string(vv[i])
+		}
+	}
+	return upperStr
 }
 
 // 生成 文件
