@@ -57,7 +57,7 @@ func (a *{{ .EntityName }}) Query(ctx context.Context, params schema.CommonQuery
 
 	opt := a.getQueryOption(opts...)
 	var list entity.{{ .EntityName }}s
-	pr, err := util.WrapPageQuery(db, opt.PageParam, &list)
+	pr, err := WrapPageQuery(db, opt.PageParam, &list)
 	if err != nil {
 		span.Errorf(err.Error())
 		return nil, errors.New("查询数据发生错误")
@@ -163,7 +163,7 @@ func (a *{{ .EntityName }}) Create(ctx context.Context, item schemaProject.{{ .E
 	span := logger.StartSpan(ctx, "创建数据", a.getFuncName("Create"))
 	defer span.Finish()
 
-	return util.DBExecTrans(ctx, a.db, func(ctx context.Context) error {
+	return ExecTrans(ctx, a.db, func(ctx context.Context) error {
 		sitem := entity.Schema{{ .EntityName }}(item)
 		result := entity.Get{{ .EntityName }}DB(ctx, a.db).Create(sitem.To{{ .EntityName }}())
 		if err := result.Error; err != nil {

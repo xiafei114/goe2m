@@ -1,0 +1,205 @@
+<template>
+  <a-card :bordered="false">
+    <div class="table-page-search-wrapper">
+      <a-form layout="inline">
+        <a-row :gutter="48">
+          <a-col :md="6" :sm="24">
+            <a-form-item label="编号">
+              <a-input v-model="queryParam.index_code" placeholder=""/>
+            </a-form-item>
+          </a-col>
+          <a-col :md="6" :sm="24">
+            <a-form-item label="名称">
+              <a-input v-model="queryParam.chn_name" placeholder=""/>
+            </a-form-item>
+          </a-col>
+          <a-col :md="!advanced && 6 || 24" :sm="24">
+            <span class="table-page-search-submitButtons" :style="advanced && { float: 'right', overflow: 'hidden' } || {} ">
+              <a-button type="primary" @click="$refs.table.refresh(true)">查询</a-button>
+              <a-button style="margin-left: 8px" @click="() => queryParam = {}">重置</a-button>
+            </span>
+          </a-col>
+        </a-row>
+      </a-form>
+    </div>
+
+    <div v-if="$auth('{{ .EntityNameLower }}.add')" class="table-operator">
+      <a-button type="primary" icon="plus" @click="$refs.createModal.add()">新建</a-button>
+    </div>
+
+    <s-table
+      ref="table"
+      size="default"
+      rowKey="record_id"
+      :pageNum="pageNo"
+      :pageSize="pageSize"
+      :columns="columns"
+      :data="loadData"
+      v-if="$auth('{{ .EntityNameLower }}.list') && loading"
+    >
+      <span slot="action" slot-scope="text, record">
+        <template>
+          <a v-if="$auth('{{ .EntityNameLower }}.edit')" @click="handleEdit(record)">编辑</a>
+          <a-divider type="vertical" />
+          <a v-if="$auth('{{ .EntityNameLower }}.delete')" @click="handleDelete(record)">删除</a>
+        </template>
+      </span>
+    </s-table>
+    <entity-Form ref="createModal" @ok="handleOk" />
+  </a-card>
+</template>
+
+<script>
+import moment from 'moment/moment'
+import { setPageSearchParam, getPageSearchParam } from '@/utils/page'
+import { STable } from '@/components'
+import entityForm from './{{ .EntityName }}Form'
+import { get{{ .EntityName }}PageList, delete{{ .EntityName }} } from '@/api/project/{{ .EntityNameLower }}'
+
+export default {
+  components: {
+    STable,
+    entityForm
+  },
+  data () {
+    return {
+      mdl: {},
+      // 高级搜索 展开/关闭
+      advanced: false,
+      // 查询参数
+      queryParam: {},
+      search_page_key: '{{ .EntityName }}List',
+      pageNo: 1,
+      pageSize: 10,
+      loading: false,
+      // 表头
+      columns: [
+        {
+          title: '编号',
+          dataIndex: 'index_code'
+        },
+        {
+          title: '名称',
+          dataIndex: 'chn_name'
+        },
+        {
+          title: '说明',
+          dataIndex: 'briefexplain'
+        },
+        {
+          title: '操作',
+          dataIndex: 'action',
+          scopedSlots: { customRender: 'action' }
+        }
+      ],
+      // 加载数据方法 必须为 Promise 对象
+      loadData: parameter => {
+        const pageParam = {
+          pageNo: parameter.pageNo,
+          pageSize: parameter.pageSize
+        }
+
+        // 保存查询条件
+        setPageSearchParam(this.search_page_key, JSON.stringify(pageParam))
+
+        return get{{ .EntityName }}PageList(Object.assign(parameter, this.queryParam))
+          .then(res => {
+            if (res.result.data === null) {
+              res.result.data = []
+            }
+            return res.result
+          })
+      },
+      selectedRowKeys: [],
+      selectedRows: [],
+
+      // custom table alert & rowSelection
+      options: {
+        alert: { show: true, clear: () => { this.selectedRowKeys = [] } },
+        rowSelection: {
+          selectedRowKeys: this.selectedRowKeys,
+          onChange: this.onSelectChange
+        }
+      },
+      optionAlertShow: false,
+      timeKey: ''
+    }
+  },
+  mounted () {
+    this.timeKey = moment().locale('zh-cn').format('YYYY-MM-DD HH:mm:ss')
+    this.initSearchPage()
+  },
+  filters: {
+  },
+  created () {
+    this.tableOption()
+  },
+  methods: {
+    initSearchPage () {
+      const pageParam = getPageSearchParam(this.search_page_key)
+      this.pageNo = pageParam.pageNo
+      this.pageSize = pageParam.pageSize
+      this.loading = true
+    },
+    searchReset () {
+      this.queryParam = {}
+    },
+    tableOption () {
+      if (!this.optionAlertShow) {
+        this.options = {
+          alert: { show: true, clear: () => { this.selectedRowKeys = [] } },
+          rowSelection: {
+            selectedRowKeys: this.selectedRowKeys,
+            onChange: this.onSelectChange
+          }
+        }
+        this.optionAlertShow = true
+      } else {
+        this.options = {
+          alert: false,
+          rowSelection: null
+        }
+        this.optionAlertShow = false
+      }
+    },
+
+    handleEdit (record) {
+      this.$refs.createModal.edit(record)
+    },
+    handleDelete (record) {
+      this.$confirm({
+        title: '确定删除此记录吗?',
+        content: '',
+        okText: '确定',
+        okType: 'danger',
+        cancelText: '取消',
+        onOk: () => {
+          delete{{ .EntityName }}({ id: record.record_id }).then(res => {
+            this.$message.info(`${record.chn_name} 删除成功`)
+            this.handleOk()
+          })
+        }
+      })
+    },
+    handleOk () {
+      this.$refs.table.refresh()
+    },
+    onSelectChange (selectedRowKeys, selectedRows) {
+      this.selectedRowKeys = selectedRowKeys
+      this.selectedRows = selectedRows
+    },
+    toggleAdvanced () {
+      this.advanced = !this.advanced
+    },
+    resetSearchForm () {
+      this.queryParam = {
+        date: moment(new Date())
+      }
+    },
+    // 批量删除
+    handleBatchDelete () {
+      this.$message.error(`${this.selectedRowKeys.length} 条数据待删除`)
+    }
+  }
+}
+</script>

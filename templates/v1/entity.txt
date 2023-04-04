@@ -1,0 +1,68 @@
+package project
+
+import (
+	"context"
+	"time"
+
+	schema "{{ .ProjectName }}/internal/app/project/schema/project"
+	"{{ .ProjectName }}/pkg/gormplus"
+	"{{ .ProjectName }}/internal/app/project/model/gorm/entity"
+)
+
+// {{ .EntityName }} {{ .EntityNote }}
+type {{ .EntityName }} struct {
+	entity.Model
+	{{ .EntityContent }}
+}
+
+// TableName 表名
+func (a {{ .EntityName }}) TableName() string {
+	return a.Model.TableName("{{ .EntityTableName }}")
+}
+
+// Get{{ .EntityName }}DB 获取{{ .EntityName }}存储
+func Get{{ .EntityName }}DB(ctx context.Context, defDB *gormplus.DB) *gormplus.DB {
+	return entity.GetDBWithModel(ctx, defDB, {{ .EntityName }}{})
+}
+
+// Schema{{ .EntityName }} {{ .EntityName }}对象
+type Schema{{ .EntityName }} schema.{{ .EntityName }}
+
+func (a {{ .EntityName }}) String() string {
+	return entity.ToString(a)
+}
+
+// {{ .EntityName }}s {{ .EntityName }}列表
+type {{ .EntityName }}s []*{{ .EntityName }}
+
+// ToSchema{{ .EntityName }}s 转换为{{ .EntityName }}对象列表
+func (a {{ .EntityName }}s) ToSchema{{ .EntityName }}s() []*schema.{{ .EntityName }} {
+	list := make([]*schema.{{ .EntityName }}, len(a))
+	for i, item := range a {
+		list[i] = item.ToSchema{{ .EntityName }}()
+	}
+	return list
+}
+
+// To{{ .EntityName }} 转换为{{ .EntityName }}实体
+func (a Schema{{ .EntityName }}) To{{ .EntityName }}() *{{ .EntityName }} {
+	item := &{{ .EntityName }}{
+		{{ .EntityToContent }}
+	}
+	return item
+}
+
+// To{{ .EntityName }}Map 转换为{{ .EntityName }}实体
+func (a Schema{{ .EntityName }}) To{{ .EntityName }}Map() map[string]interface{} {
+	item := make(map[string]interface{})
+	{{ .EntityToContentMap }}
+	return item
+}
+
+// ToSchema{{ .EntityName }} 转换为{{ .EntityName }}对象
+func (a {{ .EntityName }}) ToSchema{{ .EntityName }}() *schema.{{ .EntityName }} {
+	item := &schema.{{ .EntityName }}{
+		{{ .EntityToContent }}
+	}
+	return item
+}

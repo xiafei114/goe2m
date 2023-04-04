@@ -15,6 +15,7 @@ func init() {
 }
 
 func onInit() {
+	// err := InitFile("D:/workspace-go/src/goe2m" + "/config.yml")
 	path := tools.GetModelPath()
 	err := InitFile(path + "/config.yml")
 	if err != nil {

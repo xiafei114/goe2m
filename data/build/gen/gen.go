@@ -112,7 +112,8 @@ func Execute() {
 				modelName := row[2]
 				entityNameLower := strings.ToLower(modelName[0:1]) + modelName[1:]
 
-				tableName = strings.ToUpper(model.GetCamelName(tableName))
+				// 表名小写
+				tableName = strings.ToLower(model.GetCamelName(tableName))
 				fileName := strings.ToLower(model.GetCamelName(modelName))
 
 				genStruct = &GenStruct{
