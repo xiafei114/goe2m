@@ -44,6 +44,9 @@ func (a *{{ .EntityName }}) Query(ctx context.Context, params schema.CommonQuery
 	defer span.Finish()
 
 	db := entity.Get{{ .EntityName }}DB(ctx, a.db).DB
+  if v := params.ParentID; v != "" { // 主表ID
+		db = db.Where("parent_id=?", v)
+	}
 	if v := params.IndexCode; v != "" { //查询关联进程
 		db = db.Where("index_code=?", v)
 	}
@@ -53,7 +56,12 @@ func (a *{{ .EntityName }}) Query(ctx context.Context, params schema.CommonQuery
 	if v := params.Status; v > 0 {
 		db = db.Where("status=?", v)
 	}
-	db = db.Order("id DESC")
+	
+  if v := params.OrderBy; v != "" {
+		db = db.Order(v)
+	} else {
+		db = db.Order("id DESC")
+	}
 
 	opt := a.getQueryOption(opts...)
 	var list entity.{{ .EntityName }}s
@@ -77,6 +85,34 @@ func (a *{{ .EntityName }}) Get(ctx context.Context, recordID string, opts ...sc
 	defer span.Finish()
 
 	db := entity.Get{{ .EntityName }}DB(ctx, a.db).Where("record_id=?", recordID)
+	var item entity.{{ .EntityName }}
+	ok, err := a.db.FindOne(db, &item)
+	if err != nil {
+		span.Errorf(err.Error())
+		return nil, errors.New("查询指定数据发生错误")
+	} else if !ok {
+		return nil, nil
+	}
+
+	sitem := item.ToSchema{{ .EntityName }}()
+	return sitem, nil
+}
+
+// GetOne 查询数据
+func (a *{{ .EntityName }}) GetOne(ctx context.Context, params schema.CommonQueryParam, opts ...schema.CommonQueryOptions) (*schemaProject.{{ .EntityName }}, error) {
+	span := logger.StartSpan(ctx, "查询数据", a.getFuncName("GetOne"))
+	defer span.Finish()
+
+	db := entity.Get{{ .EntityName }}DB(ctx, a.db).DB
+	if v := params.IndexCode; v != "" { //查询关联进程
+		db = db.Where("index_code=?", v)
+	}
+	if v := params.ChnName; v != "" {
+		db = db.Where("chn_name LIKE ?", "%"+v+"%")
+	}
+
+	db = db.Order("id DESC")
+
 	var item entity.{{ .EntityName }}
 	ok, err := a.db.FindOne(db, &item)
 	if err != nil {
@@ -226,6 +262,27 @@ func (a *{{ .EntityName }}) Delete(ctx context.Context, recordID string) error {
 		span.Errorf(err.Error())
 		return errors.New("删除数据发生错误")
 	}
+	return nil
+}
+
+// BatchDelete 批量删除
+func (a *{{ .EntityName }}) BatchDelete(ctx context.Context, params schema.CommonQueryParam) error {
+	span := logger.StartSpan(ctx, "批量删除数据", a.getFuncName("BatchDelete"))
+	defer span.Finish()
+
+	db := entity.Get{{ .EntityName }}DB(ctx, a.db).DB
+
+	if v := params.ParentID; v != "" { // 主表ID
+		db = db.Where("parent_id=?", v)
+	}
+
+	result := db.Delete(&entity.{{ .EntityName }}{})
+
+	if err := result.Error; err != nil {
+		span.Errorf(err.Error())
+		return errors.New("删除数据发生错误")
+	}
+
 	return nil
 }
 

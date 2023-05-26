@@ -4,6 +4,8 @@ type I{{ .EntityName }} interface {
 	Query(ctx context.Context, params schema.CommonQueryParam, opts ...schema.CommonQueryOptions) (*schema.CommonQueryResult, error)
 	// 查询指定数据
 	Get(ctx context.Context, recordID string, opts ...schema.CommonQueryOptions) (*schemaProject.{{ .EntityName }}, error)
+  // 查询指定数据
+	GetOne(ctx context.Context, params schema.CommonQueryParam, opts ...schema.CommonQueryOptions) (*schemaProject.{{ .EntityName }}, error)
 	// 建立缓存
 	BuildCacheEntity(ctx context.Context, recordID string) (*schemaProject.{{ .EntityName }}, error)
 	// GetCacheEntity 从缓存中获得内容
@@ -20,6 +22,8 @@ type I{{ .EntityName }} interface {
 	UpdateMap(ctx context.Context, recordID string, mapItem map[string]interface{}) error
 	// 删除数据
 	Delete(ctx context.Context, recordID string) error
+  // 批量删除
+	BatchDelete(ctx context.Context, params schema.CommonQueryParam) error
 	// 更新状态
 	UpdateStatus(ctx context.Context, recordID string, status int) error
 }
