@@ -54,12 +54,9 @@ export default {
       this.confirmLoading = true
       validateFields((errors, values) => {
         if (!errors) {
-          console.log('values', values)
           const action = this.entityId === '' ? 'add{{ .EntityName }}' : 'update{{ .EntityName }}'
           values.record_id = this.entityId
-          values.actions = this.subData
           this.$store.dispatch(action, values).then(res => {
-            console.log(res)
             this.$notification['success']({
               message: '成功通知',
               description: this.entityId === '' ? '添加成功！' : '更新成功！'
@@ -70,7 +67,6 @@ export default {
             this.$emit('ok', values)
           }).catch(error => {
             const errorData = pick(error.response.data, ['error'])
-            console.log(errorData)
             this.$notification['error']({
               message: '错误',
               description: errorData.error.message
@@ -92,10 +88,8 @@ export default {
       const { form } = this
       get{{ .EntityName }}(Object.assign(data.record_id))
         .then(res => {
-          console.log(res)
           const formData = pick(res, [{{ .HTMLEntitys }}])
           this.entityId = formData.record_id
-          console.log('formData', formData)
           form.setFieldsValue(formData)
         })
     }
