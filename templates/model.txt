@@ -50,6 +50,9 @@ func (a *{{ .EntityName }}) Query(ctx context.Context, params schema.CommonQuery
 	if v := params.IndexCode; v != "" { //查询关联进程
 		db = db.Where("index_code=?", v)
 	}
+	if v := params.KeyWord; v != "" {
+		db = db.Where("chn_name LIKE ?", "%"+v+"%")
+	}
 	if v := params.ChnName; v != "" {
 		db = db.Where("chn_name LIKE ?", "%"+v+"%")
 	}

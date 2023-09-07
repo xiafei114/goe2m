@@ -51,6 +51,7 @@ func (a *{{ .EntityName }}) Query(c *gin.Context) {
 // @Param pageSize query int true "分页大小" 10
 // @Param index_code query string false "编号"
 // @Param chn_name query string false "名称"
+// @Param key_word query string false "关键词"
 // @Param status query int false "状态(1:启用 2:停用)"
 // @Success 200 []projectSchema.{{ .EntityName }} "查询结果：{list:列表数据,pagination:{current:页索引,pageSize:页大小,total:总数量}}"
 // @Failure 400 schema.HTTPError "{error:{code:0,message:未知的查询类型}}"
@@ -61,6 +62,7 @@ func (a *{{ .EntityName }}) QueryPage(c *gin.Context) {
 	var params schema.CommonQueryParam
 	params.IndexCode = c.Query("index_code")
 	params.ChnName = c.Query("chn_name")
+	params.KeyWord = c.Query("key_word")
 	params.Status = util.S(c.Query("status")).Int()
 
 	items, pr, err := a.{{ .EntityName }}Bll.QueryPage(ginplus.NewContext(c), params, ginplus.GetPaginationParam(c))
