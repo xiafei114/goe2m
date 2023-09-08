@@ -54,7 +54,7 @@ import moment from 'moment/moment'
 import { setPageSearchParam, getPageSearchParam } from '@/utils/page'
 import { STable } from '@/components'
 import entityForm from './{{ .EntityName }}Form'
-import { get{{ .EntityName }}PageList, delete{{ .EntityName }} } from '@/api/project/{{ .EntityNameLower }}'
+import { get{{ .EntityName }}PageList, delete{{ .EntityName }} } from '@/api/project/business/{{ .EntityNameLower }}'
 
 export default {
   components: {

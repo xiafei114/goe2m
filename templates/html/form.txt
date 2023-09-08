@@ -16,7 +16,7 @@
 </template>
 
 <script>
-import { get{{ .EntityName }} } from '@/api/project/{{ .EntityNameLower }}'
+import { get{{ .EntityName }} } from '@/api/project/business/{{ .EntityNameLower }}'
 import pick from 'lodash.pick'
 
 export default {
