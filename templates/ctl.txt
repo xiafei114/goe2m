@@ -64,6 +64,7 @@ func (a *{{ .EntityName }}) QueryPage(c *gin.Context) {
 	params.ChnName = c.Query("chn_name")
 	params.KeyWord = c.Query("key_word")
 	params.Status = util.S(c.Query("status")).Int()
+	params.OrderBy = c.Query("order_by")
 
 	items, pr, err := a.{{ .EntityName }}Bll.QueryPage(ginplus.NewContext(c), params, ginplus.GetPaginationParam(c))
 	if err != nil {
@@ -86,6 +87,7 @@ func (a *{{ .EntityName }}) QueryPage(c *gin.Context) {
 func (a *{{ .EntityName }}) QueryList(c *gin.Context) {
 	var params schema.CommonQueryParam
 	params.ParentID = c.Query("parent_id")
+	params.OrderBy = c.Query("order_by")
 
 	items, err := a.{{ .EntityName }}Bll.QueryList(ginplus.NewContext(c), params)
 	if err != nil {
