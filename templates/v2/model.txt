@@ -5,12 +5,12 @@ import (
 	"fmt"
 	"log"
 
-	entity "{{ .ProjectName }}/platform/internal/app/project/model/gorm/entity/project"
-	schema "{{ .ProjectName }}/platform/internal/app/project/schema"
-	schemaProject "{{ .ProjectName }}/platform/internal/app/project/schema/project"
-	"{{ .ProjectName }}/platform/pkg/errors"
-	"{{ .ProjectName }}/platform/pkg/gormplus"
-	"{{ .ProjectName }}/platform/pkg/logger"
+	entity "{{ .ProjectName }}/internal/app/project/model/gorm/entity/project"
+	schema "{{ .ProjectName }}/internal/app/project/schema"
+	schemaProject "{{ .ProjectName }}/internal/app/project/schema/project"
+	"{{ .ProjectName }}/pkg/errors"
+	"{{ .ProjectName }}/pkg/gormplus"
+	"{{ .ProjectName }}/pkg/logger"
 
 	"github.com/aiscrm/redisgo"
 )

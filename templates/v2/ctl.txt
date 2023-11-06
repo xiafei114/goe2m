@@ -1,13 +1,13 @@
 package project
 
 import (
-	"{{ .ProjectName }}/platform/internal/app/project/bll"
-	projectBll "{{ .ProjectName }}/platform/internal/app/project/bll/project"
-	"{{ .ProjectName }}/platform/internal/app/project/ginplus"
-	"{{ .ProjectName }}/platform/internal/app/project/schema"
-	projectSchema "{{ .ProjectName }}/platform/internal/app/project/schema/project"
-	"{{ .ProjectName }}/platform/pkg/errors"
-	"{{ .ProjectName }}/platform/pkg/util"
+	"{{ .ProjectName }}/internal/app/project/bll"
+	projectBll "{{ .ProjectName }}/internal/app/project/bll/project"
+	"{{ .ProjectName }}/internal/app/project/ginplus"
+	"{{ .ProjectName }}/internal/app/project/schema"
+	projectSchema "{{ .ProjectName }}/internal/app/project/schema/project"
+	"{{ .ProjectName }}/pkg/errors"
+	"{{ .ProjectName }}/pkg/util"
 
 	"github.com/gin-gonic/gin"
 )

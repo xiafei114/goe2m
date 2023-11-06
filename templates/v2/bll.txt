@@ -3,12 +3,12 @@ package project
 import (
 	"context"
 
-	icontext "{{ .ProjectName }}/platform/internal/app/project/context"
-	"{{ .ProjectName }}/platform/internal/app/project/model"
-	"{{ .ProjectName }}/platform/internal/app/project/schema"
-	schemaProject "{{ .ProjectName }}/platform/internal/app/project/schema/project"
-	"{{ .ProjectName }}/platform/pkg/errors"
-	"{{ .ProjectName }}/platform/pkg/util"
+	icontext "{{ .ProjectName }}/internal/app/project/context"
+	"{{ .ProjectName }}/internal/app/project/model"
+	"{{ .ProjectName }}/internal/app/project/schema"
+	schemaProject "{{ .ProjectName }}/internal/app/project/schema/project"
+	"{{ .ProjectName }}/pkg/errors"
+	"{{ .ProjectName }}/pkg/util"
 )
 
 // New{{ .EntityName }} 创建{{ .EntityName }}

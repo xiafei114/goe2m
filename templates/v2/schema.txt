@@ -1,0 +1,9 @@
+// Get{{ .EntityName }}RecordIDKey 获得存储主键key
+func (a *{{ .EntityName }}) Get{{ .EntityName }}RecordIDKey() string {
+	return fmt.Sprintf("%s:%s:%s:%s", projectName, "{{ .EntityName }}", "RecordID", a.RecordID)
+}
+
+// {{ .EntityName }} {{ .EntityNote }}.
+type {{ .EntityName }} struct {
+	{{ .EntitySchemaContent }}
+}

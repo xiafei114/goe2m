@@ -4,9 +4,9 @@ import (
 	"context"
 	"time"
 
-	schema "{{ .ProjectName }}/platform/internal/app/project/schema/project"
-	"{{ .ProjectName }}/platform/pkg/gormplus"
-	"{{ .ProjectName }}/platform/internal/app/project/model/gorm/entity"
+	schema "{{ .ProjectName }}/internal/app/project/schema/project"
+	"{{ .ProjectName }}/pkg/gormplus"
+	"{{ .ProjectName }}/internal/app/project/model/gorm/entity"
 )
 
 // {{ .EntityName }} {{ .EntityNote }}

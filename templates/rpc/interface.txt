@@ -1,0 +1,29 @@
+// I{{ .EntityName }} {{ .EntityName }}存储接口.
+type I{{ .EntityName }} interface {
+	// 查询数据
+	Query(ctx context.Context, params schema.CommonQueryParam, opts ...schema.CommonQueryOptions) (*schema.CommonQueryResult, error)
+	// 查询指定数据
+	Get(ctx context.Context, recordID string, opts ...schema.CommonQueryOptions) (*schemaProject.{{ .EntityName }}, error)
+  // 查询指定数据
+	GetOne(ctx context.Context, params schema.CommonQueryParam, opts ...schema.CommonQueryOptions) (*schemaProject.{{ .EntityName }}, error)
+	// 建立缓存
+	BuildCacheEntity(ctx context.Context, recordID string) (*schemaProject.{{ .EntityName }}, error)
+	// GetCacheEntity 从缓存中获得内容
+	GetCacheEntity(ctx context.Context, recordID string) (*schemaProject.{{ .EntityName }}, error)
+	// 删除缓存
+	RemoveCacheEntity(ctx context.Context, recordID string) error
+	// 创建数据
+	Create(ctx context.Context, item schemaProject.{{ .EntityName }}) error
+	// 更新数据
+	UpdateItem(ctx context.Context, recordID string, item schemaProject.{{ .EntityName }}) error
+	// MapItem更新数据
+	UpdateMapItem(ctx context.Context, recordID string, item schemaProject.{{ .EntityName }}) error
+	// Map更新数据
+	UpdateMap(ctx context.Context, recordID string, mapItem map[string]interface{}) error
+	// 删除数据
+	Delete(ctx context.Context, recordID string) error
+  // 批量删除
+	BatchDelete(ctx context.Context, params schema.CommonQueryParam) error
+	// 更新状态
+	UpdateStatus(ctx context.Context, recordID string, status int) error
+}

@@ -51,3 +51,11 @@ export function delete{{ .EntityName }} (params) {
     method: 'delete'
   })
 }
+
+// 更新{{ .EntityNote }}状态
+export function update{{ .EntityName }}Status (id, type) {
+  return axios({
+    url: `/v1/${router}/updateStatus/${id}?q=${type}`,
+    method: 'patch'
+  })
+}
