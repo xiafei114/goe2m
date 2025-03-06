@@ -6,5 +6,5 @@ require (
 	github.com/360EntSecGroup-Skylar/excelize v1.4.1
 	github.com/spf13/cobra v0.0.5
 	github.com/stretchr/testify v1.4.0 // indirect
-	gopkg.in/yaml.v2 v2.2.2
+	gopkg.in/yaml.v2 v2.2.8
 )
