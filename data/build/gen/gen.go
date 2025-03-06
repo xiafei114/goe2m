@@ -5,12 +5,11 @@ import (
 	"fmt"
 	"goe2m/data/build/model"
 	"goe2m/data/config"
+	"goe2m/tools"
 	"log"
 	"regexp"
 	"strings"
 	"text/template"
-
-	"github.com/xxjwxc/public/tools"
 
 	"github.com/360EntSecGroup-Skylar/excelize"
 )
