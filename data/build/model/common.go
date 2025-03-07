@@ -1,6 +1,6 @@
 package model
 
-import "github.com/xxjwxc/public/mybigcamel"
+import "goe2m/mybigcamel"
 
 // GetCamelName Big Hump or Capital Letter.大驼峰或者首字母大写
 func GetCamelName(name string) string {
